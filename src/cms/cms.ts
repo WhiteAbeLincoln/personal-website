@@ -6,7 +6,7 @@ CMS.init({
     backend: {
       name: 'github',
       repo: 'WhiteAbeLincoln/personal-website',
-      branch: 'source',
+      branch: 'master',
     },
     publish_mode: 'editorial_workflow',
     local_backend: process.env.NODE_ENV === 'development',

@@ -5,9 +5,8 @@ import {
   Interpolation,
   CSSObject,
 } from '@emotion/react'
-import { Equal, Matches, RequireKeys, The } from '@util/types'
+import { Matches, RequireKeys } from '@util/types'
 import { CSSProperties, PropsWithChildren } from 'react'
-import { inherits } from 'util'
 
 export type TypographyVariant =
   | 'h1'

@@ -3,6 +3,7 @@
 module.exports = {
   siteMetadata: {
     title: "Abraham White",
+    siteUrl: 'https://abewhite.dev'
   },
   plugins: [
     {

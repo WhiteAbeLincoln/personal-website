@@ -5,7 +5,7 @@ import {
   Field,
 } from 'netlify-cms-app'
 import { AllPaths, MustInclude } from '@util/types'
-import { TypographyVariant } from '@src/styles/makeStyles'
+import { TypographyVariant } from '@comps/theme/Theme'
 import { GetObjectFieldType } from './utility-types'
 import * as CSS from 'csstype'
 
@@ -230,7 +230,6 @@ export const extendedTypographyFields = [
       'caption',
       'button',
       'overline',
-      'title',
     ),
   },
   ...typographyFields,
