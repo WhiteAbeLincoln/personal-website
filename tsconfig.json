@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "checkJs": true,
+    "jsx": "preserve",
+    "skipLibCheck": true,
+    "outDir": "./build",
+    "rootDir": ".",
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "baseUrl": "src",
+    "paths": {
+      "@util/*": [
+        "./util/*"
+      ],
+      "@comps/*": [
+        "./components/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "gatsby-*.js",
+    "config/**/*.ts"
+  ]
+}

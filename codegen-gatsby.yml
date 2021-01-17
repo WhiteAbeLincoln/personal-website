@@ -1,0 +1,22 @@
+overwrite: true
+pluckConfig:
+  gqlMagicComment: ''
+  globalGqlIdentifierName: []
+  modules:
+    - name: 'gatsby'
+      identifier: 'graphql'
+schema: http://localhost:8000/___graphql
+documents:
+  # - ./node_modules/gatsby-transformer-sharp/src/fragments.js
+  - src/**/!(*.d).{ts,tsx}
+generates:
+  src/graphql.gen.d.ts:
+    plugins:
+      - typescript:
+          maybeValue: T | null | undefined
+          enumsAsTypes: true
+          scalars:
+            Date: Date
+      - typescript-operations:
+          scalars:
+            Date: Date

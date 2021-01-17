@@ -1,9 +1,27 @@
+/* eslint-env node */
+
 module.exports = {
   siteMetadata: {
     title: "Abraham White",
   },
   plugins: [
-    "gatsby-plugin-netlify-cms",
+    {
+      resolve: "gatsby-plugin-netlify-cms",
+      options: {
+        enableIdentityWidget: false,
+        modulePath: `./src/cms/cms.ts`,
+        manualInit: true,
+      },
+    },
+    {
+      resolve: 'gatsby-plugin-alias-imports',
+      options: {
+        alias: {
+          '@util': './src/util',
+          '@comps': './src/components',
+        },
+      },
+    },
     "gatsby-plugin-emotion",
     {
       resolve: "gatsby-plugin-google-analytics",
