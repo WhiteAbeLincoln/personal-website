@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // tslint:disable-next-line: no-implicit-dependencies
+import { ClassNameMap, Styles } from '@material-ui/styles'
 import { Equal, If, Matches } from './typelevel/boolean'
 import { Add } from './typelevel/number'
 import { Prepend, Reverse, Tail } from './typelevel/tuple'
@@ -109,3 +111,32 @@ export type FollowPath_<T, P extends (keyof any)[]> = P extends [keyof T]
   ? { [k in P[0]]: FollowPath_<T[k], Tail<P>> }[P[0]]
   : never
 export type FollowPath<T, K extends AllPaths<T>> = FollowPath_<T, K>
+
+export type StylesHook<
+  Props extends object = {},
+  ClassKey extends string = string
+> = keyof Props extends never
+  ? (props?: unknown) => ClassNameMap<ClassKey>
+  : (props: Props) => ClassNameMap<ClassKey>
+
+type _ClassesProp<Key extends string, Obj, Req = false> = {
+  [k in Key]?: Req extends true
+    ? Required<{ [k in keyof Obj]?: string }>
+    : { [k in keyof Obj]?: string }
+}
+export type ClassesProp<
+  UseStyles extends
+    | ((props?: object) => Partial<{ [k: string]: string }>)
+    | StylesHook<any, any>
+    | Partial<Record<string, Record<string, unknown>>>
+    | Styles<any, any, any>,
+  Req = false,
+  Key extends string = 'classes',
+  Obj = UseStyles extends (...args: any[]) => any
+    ? ReturnType<UseStyles>
+    : UseStyles
+> = (Req extends true
+  ? Required<_ClassesProp<Key, Obj, Req>>
+  : _ClassesProp<Key, Obj, Req>) & {
+  className?: string
+}

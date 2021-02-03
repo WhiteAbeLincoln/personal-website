@@ -13,13 +13,19 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "baseUrl": "src",
+    "baseUrl": ".",
     "paths": {
       "@util/*": [
-        "./util/*"
+        "./src/util/*"
       ],
       "@comps/*": [
-        "./components/*"
+        "./src/components/*"
+      ],
+      "@src/*": [
+        "./src/*"
+      ],
+      "@styles/*": [
+        "./src/styles/*"
       ]
     }
   },

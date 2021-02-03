@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { Equal, If, Matches } from './boolean'
 
 /**
@@ -43,7 +44,7 @@ export type NullKeys<T> = KeysOfType2<T, null>
 export type MaybeKeys<T> = OptionalKeys<T> | NullKeys<T>
 
 export type DeepRequired<T> = NonNullable<
-  T extends any[]
+  T extends unknown[]
     ? DeepRequiredArray<T[number]>
     : T extends object
     ? DeepRequiredObject<T>
@@ -53,7 +54,7 @@ export type DeepRequired<T> = NonNullable<
 interface DeepRequiredArray<T> extends Array<DeepRequired<T>> {}
 type DeepRequiredObject<T> = { [P in keyof T]-?: DeepRequired<T[P]> }
 
-export type DeepMaybe<T> = T extends any[]
+export type DeepMaybe<T> = T extends unknown[]
   ? { [k in keyof T]?: DeepMaybe<T[k]> } | null | undefined
   : T extends object
   ? { [k in keyof T]?: DeepMaybe<T[k]> } | null | undefined
@@ -87,3 +88,5 @@ export type ReplaceKeyPair<T, K, Match, RT, k = never> = T extends object
   : k extends K
   ? ReplaceTypeOnce<T, Match, RT>
   : T
+
+export type MakePartial<P, K extends keyof P> = Omit<P, K> & { [k in K]?: P[k] }

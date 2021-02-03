@@ -5,7 +5,7 @@ import {
   Field,
 } from 'netlify-cms-app'
 import { AllPaths, MustInclude } from '@util/types'
-import { TypographyVariant } from '@comps/theme/Theme'
+import { TypographyVariant } from '@src/styles/theme'
 import { GetObjectFieldType } from './utility-types'
 import * as CSS from 'csstype'
 
@@ -217,6 +217,7 @@ export const extendedTypographyFields = [
     hint:
       'Extend typography specified in the site theme. Print pages will use the print theme',
     options: optionsSafe<TypographyVariant>()(
+      'display',
       'h1',
       'h2',
       'h3',

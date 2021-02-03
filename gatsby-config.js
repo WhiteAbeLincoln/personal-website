@@ -2,12 +2,12 @@
 
 module.exports = {
   siteMetadata: {
-    title: "Abraham White",
-    siteUrl: 'https://abewhite.dev'
+    title: 'Abraham White',
+    siteUrl: 'https://abewhite.dev',
   },
   plugins: [
     {
-      resolve: "gatsby-plugin-netlify-cms",
+      resolve: 'gatsby-plugin-netlify-cms',
       options: {
         enableIdentityWidget: false,
         modulePath: `./src/cms/cms.ts`,
@@ -20,26 +20,36 @@ module.exports = {
         alias: {
           '@util': './src/util',
           '@comps': './src/components',
+          '@styles': './src/styles',
+          '@src': './src',
         },
       },
     },
-    "gatsby-plugin-emotion",
+    'gatsby-plugin-material-ui',
     {
-      resolve: "gatsby-plugin-google-analytics",
+      resolve: 'gatsby-plugin-google-analytics',
       options: {
-        trackingId: "258327814",
+        trackingId: '258327814',
       },
     },
-    "gatsby-plugin-react-helmet",
-    "gatsby-plugin-sitemap",
-    "gatsby-plugin-mdx",
+    'gatsby-plugin-react-helmet',
+    'gatsby-plugin-sitemap',
     {
-      resolve: "gatsby-source-filesystem",
+      resolve: 'gatsby-source-filesystem',
       options: {
-        name: "pages",
-        path: "./src/pages/",
+        name: 'pages',
+        path: './src/pages/',
       },
-      __key: "pages",
+      __key: 'pages',
     },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        name: 'page_data',
+        path: `${__dirname}/src/data/pages`,
+      },
+      __key: 'page_data',
+    },
+    'gatsby-plugin-mdx',
   ],
-};
+}

@@ -47,7 +47,11 @@ export type Reverse<Tuple extends any[], Prefix extends any[] = []> = {
   ? IsFinite<Tuple, 'nonEmpty', 'infinite'>
   : 'empty']
 
-export type IsFinite<Tuple extends any[], Finite, Infinite> = {
+export type IsFinite<
+  Tuple extends readonly any[],
+  Finite = '1',
+  Infinite = '0'
+> = {
   empty: Finite
   nonEmpty: ((..._: Tuple) => any) extends (
     _: infer First,
@@ -63,3 +67,7 @@ export type IsFinite<Tuple extends any[], Finite, Infinite> = {
     ? 'infinite'
     : 'nonEmpty'
   : never]
+
+export type ArrayKeys = keyof unknown[]
+export type Indices<T> = Exclude<keyof T, ArrayKeys>
+export type Idx<Arr, I extends number> = Arr extends unknown[] ? Arr[I] : never
