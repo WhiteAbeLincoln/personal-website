@@ -3,11 +3,15 @@ import {
   FileCollectionEntry,
   RelationWidgetField,
   Field,
+  ObjectWidgetField,
 } from 'netlify-cms-app'
-import { AllPaths, MustInclude } from '@util/types'
-import { TypographyVariant } from '@src/styles/theme'
+import { AllPaths, MustInclude, UnionToIntersection } from '../util/types'
 import { GetObjectFieldType } from './utility-types'
-import * as CSS from 'csstype'
+import { Properties as CSSProperties } from 'csstype'
+
+export const mdxCollection = { extension: 'mdx', format: 'yaml-frontmatter' } as const
+
+export const widgetSym = Symbol('aw-widgets')
 
 export const pattern = <T = never>(regex: string, message: string) =>
   ([regex, message] as unknown) as readonly [string, string] & { __type: T }
@@ -62,7 +66,7 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1)
  * @param widget widget type, usually string
  */
 export const cssProp = <
-  N extends keyof CSS.Properties<string | number>,
+  N extends keyof CSSProperties<string | number>,
   W extends Field['widget'] = 'string'
 >(
   name: N,
@@ -80,7 +84,7 @@ export const cssProp = <
     required: false,
   } as const)
 
-export const cssProps = <Ns extends (keyof CSS.Properties<string | number>)[]>(
+export const cssProps = <Ns extends (keyof CSSProperties<string | number>)[]>(
   ...ns: Ns
 ) =>
   ns.map(n => cssProp(n)) as {
@@ -210,29 +214,6 @@ export const paletteColor = <
   } as const)
 
 export const extendedTypographyFields = [
-  {
-    widget: 'select',
-    name: 'variant',
-    required: false,
-    hint:
-      'Extend typography specified in the site theme. Print pages will use the print theme',
-    options: optionsSafe<TypographyVariant>()(
-      'display',
-      'h1',
-      'h2',
-      'h3',
-      'h4',
-      'h5',
-      'h6',
-      'subtitle1',
-      'subtitle2',
-      'body1',
-      'body2',
-      'caption',
-      'button',
-      'overline',
-    ),
-  },
   ...typographyFields,
   ...paddingFields,
   ...marginFields,
@@ -249,6 +230,7 @@ export const typog = <N extends string, R extends boolean = false>(
     required,
     collapsed: true,
   } as const)
+export type TypogStylesData = GetObjectFieldType<ReturnType<typeof typog>>
 
 export const markdownFields = [
   {
@@ -427,6 +409,7 @@ export type TemplateKey =
   | 'signup'
   | 'simple'
   | 'demo-video'
+  | 'widget-page'
 
 export const templateKey = <K extends TemplateKey>(key: K) =>
   ({
@@ -448,85 +431,55 @@ export const titleField = {
   widget: 'string',
 } as const
 
-export const seoField = <
-  K extends Partial<
-    Record<
-      | 'seo'
-      | 'description'
-      | 'title'
-      | 'keywords'
-      | 'author'
-      | 'image'
-      | 'lang'
-      | 'meta',
-      boolean
-    >
-  > = Record<
-    | 'seo'
-    | 'description'
-    | 'title'
-    | 'keywords'
-    | 'author'
-    | 'image'
-    | 'lang'
-    | 'meta',
-    undefined
-  >
->(
-  required: K = {} as K,
-) => {
-  const r = <k extends keyof K>(key: k) =>
-    !!required[key] as K[k] extends undefined | false ? false : true
-
-  return {
-    name: 'seo',
-    label: 'Search Engine Optimization',
-    required: r('seo'),
-    widget: 'object',
-    fields: [
-      {
-        name: 'description',
-        required: r('description'),
-        widget: 'string',
-      },
-      {
-        name: 'title',
-        required: r('title'),
-        widget: 'string',
-      },
-      { name: 'keywords', required: r('keywords'), widget: 'list' },
-      {
-        name: 'author',
-        label: 'Twitter Handle',
-        required: r('author'),
-        widget: 'string',
-      },
-      {
-        name: 'image',
-        label: 'Preview Image',
-        required: r('image'),
-        widget: 'image',
-      },
-      {
-        name: 'lang',
-        label: 'Language Code (ISO 639-1)',
-        required: r('lang'),
-        widget: 'string',
-      },
-      {
-        name: 'meta',
-        label: 'Extra Metadata',
-        required: r('meta'),
-        widget: 'list',
-        fields: [
-          { name: 'name', widget: 'string' },
-          { name: 'content', widget: 'string' },
-        ],
-      },
-    ],
-    collapsed: true,
-  } as const
-}
+export const seoField = {
+  [widgetSym]: 'SEO',
+  name: 'seo',
+  label: 'Search Engine Optimization',
+  required: false,
+  widget: 'object',
+  fields: [
+    {
+      name: 'description',
+      required: false,
+      widget: 'string',
+    },
+    {
+      name: 'title',
+      required: false,
+      widget: 'string',
+    },
+    { name: 'keywords', required: false, widget: 'list' },
+    {
+      name: 'author',
+      label: 'Twitter Handle',
+      required: false,
+      widget: 'string',
+    },
+    {
+      name: 'image',
+      label: 'Preview Image',
+      required: false,
+      widget: 'image',
+    },
+    {
+      name: 'lang',
+      label: 'Language Code (ISO 639-1)',
+      required: false,
+      widget: 'string',
+    },
+    {
+      name: 'meta',
+      label: 'Extra Metadata',
+      required: false,
+      widget: 'list',
+      fields: [
+        { name: 'name', widget: 'string' },
+        { name: 'content', widget: 'string' },
+      ],
+    },
+  ],
+  collapsed: true,
+} as const
 
 /**
  * @param {string} name
@@ -534,12 +487,14 @@ export const seoField = <
  */
 export const flexibleList = <N extends string>(name: N) =>
   ({
+    [widgetSym]: 'FlexibleList',
     name,
     widget: 'object',
     required: false,
     fields: [
       { name: 'title', widget: 'string', required: false },
       {
+        [widgetSym]: 'FlexibleListEntry',
         name: 'items',
         widget: 'list',
         fields: [
@@ -665,7 +620,7 @@ export const basicPageNoT = <
       titleField,
       bodyField,
       { ...stylesField, fields: [bodyStylesField] },
-      seoField(),
+      seoField,
     ],
   } as const)
 export const basicPage = <T extends TemplateKey>(template: T) => <
@@ -682,6 +637,235 @@ export const basicPage = <T extends TemplateKey>(template: T) => <
 }
 
 export const simplePage = basicPage('simple')
+
+export const pageWidgets = <Types extends WidgetMap[keyof WidgetMap][]>(
+  ...types: Types
+) =>
+  ({
+    name: 'widgets',
+    label: 'Widgets',
+    hint: 'Page Widgets',
+    widget: 'list',
+    typeKey: 'kind',
+    types,
+  } as const)
+
+export const widgetStyles = {
+  [widgetSym]: 'WidgetStyles',
+  name: 'styles',
+  widget: 'object',
+  required: false,
+  collapsed: true,
+  fields: [...typographyFields, ...contentBoxFields, ...positionFields],
+} as const
+export type WidgetStylesData = GetObjectFieldType<typeof widgetStyles>
+
+export const headerWidget = {
+  [widgetSym]: 'HeaderWidget',
+  name: 'header',
+  label: 'Header',
+  widget: 'object',
+  summary: 'Header ({{fields.level}}) - {{fields.content}}',
+  fields: [
+    str('content'),
+    {
+      name: 'level',
+      label: 'Heading Level',
+      widget: 'select',
+      options: optionsSafe<'title' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'>()(
+        'title',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+      ),
+    },
+    widgetStyles,
+  ],
+} as const
+export type HeaderWidgetData = GetObjectFieldType<typeof headerWidget>
+
+export const textWidget = {
+  [widgetSym]: 'TextWidget',
+  name: 'text',
+  label: 'Text',
+  widget: 'object',
+  fields: [
+    {
+      name: 'content',
+      widget: 'markdown',
+    },
+    {
+      name: 'styles',
+      widget: 'object',
+      required: false,
+      collapsed: true,
+      fields: markdownFields,
+    },
+  ],
+} as const
+export type TextWidgetData = GetObjectFieldType<typeof textWidget>
+
+export const imageWidget = {
+  [widgetSym]: 'ImageWidget',
+  name: 'image',
+  label: 'Image',
+  widget: 'object',
+  fields: [
+    {
+      name: 'image',
+      label: 'Pick or Upload Image',
+      widget: 'image',
+      required: false,
+    },
+    {
+      name: 'image_link',
+      label: 'Link to Image',
+      widget: 'string',
+      required: false,
+    },
+    {
+      name: 'alt',
+      label: 'Alt Text',
+      widget: 'string',
+      hint: 'Required for accessiblity',
+      required: false,
+      default: '',
+    },
+    widgetStyles,
+  ],
+} as const
+export type ImageWidgetData = GetObjectFieldType<typeof imageWidget>
+
+// Hidden widgets don't work except in folder collections
+// https://github.com/netlify/netlify-cms/issues/3046
+// That is really stupid. why can't we have a widget
+// that doesn't display but just saves a value and
+// works everywhere?
+// export const standaloneWidget = <
+//   W extends ObjectWidgetField,
+//   TypeKey extends string = 'type',
+//   NewW extends Partial<Omit<ObjectWidgetField, 'fields'>> = {}
+// >(
+//   widget: W,
+//   typeKey = 'type' as TypeKey,
+//   newWidget = {} as NewW,
+// ) =>
+//   ({
+//     ...(widget as Omit<W, 'fields' | keyof NewW>),
+//     ...(newWidget as NewW),
+//     fields: [
+//       {
+//         name: typeKey,
+//         widget: 'hidden',
+//         default: widget.name as W['name'],
+//       },
+//       ...(widget.fields as W['fields']),
+//     ] as const,
+//   } as const)
+
+export const testimonialWidget = {
+  [widgetSym]: 'TestimonialWidget',
+  name: 'testimonial',
+  label: 'Testimonial',
+  widget: 'object',
+  summary: 'Testimonial by {{fields.author.content}}',
+  fields: [
+    { ...textWidget, label: 'Testimonial Body' },
+    { ...imageWidget, required: false },
+    { ...textWidget, name: 'author', label: 'Author' },
+    widgetStyles,
+  ],
+} as const
+export type TestimonialWidgetData = GetObjectFieldType<typeof testimonialWidget>
+
+type WidgetMapper<T extends ObjectWidgetField> = UnionToIntersection<
+  T extends ObjectWidgetField
+    ? {
+        [k in T['name']]: T
+      }
+    : never
+>
+// When adding new widgets, don't forget to add them to the
+// following map
+export type WidgetMap = WidgetMapper<
+  | typeof headerWidget
+  | typeof textWidget
+  | typeof imageWidget
+  | typeof testimonialWidget
+>
+
+export const styledStr = <
+  N extends string,
+  W extends 'text' | 'string' = 'string'
+>(
+  name: N,
+  widget = 'string' as W,
+) =>
+  ({
+    [widgetSym]: 'StyledStr',
+    name,
+    widget: 'object',
+    fields: [
+      { widget, name: 'value', label: 'Value' },
+      { ...typog('styles'), label: 'Styles' },
+    ],
+  } as const)
+
+export type StyledStr = GetObjectFieldType<ReturnType<typeof styledStr>>
+
+export const styledLabelValue = <N extends string, L extends string>(
+  name: N,
+  label?: L,
+) => {
+  const base = {
+    [widgetSym]: 'StyledLabelValue',
+    name: `label_${name}`,
+    widget: 'object',
+    fields: [
+      { widget: 'string', name: 'value', label: 'Label Text' },
+      { ...typog('label_styles'), label: 'Label Styles' },
+      { ...typog('value_styles'), label: 'Value Styles' },
+    ],
+  } as const
+  if (label) (base as any).label = label
+  return base as typeof base & { readonly label?: L }
+}
+export type StyledLabelValue = GetObjectFieldType<
+  ReturnType<typeof styledLabelValue>
+>
+
+type MapGraphFields<Data extends string[]> = {
+  [k in keyof Data]: Omit<ReturnType<typeof graphData>, 'name'> & {
+    name: `data_${Data[k] & string}`
+  }
+}
+
+export const graphData = <N extends string>(name: N) =>
+  ({
+    [widgetSym]: 'GraphData',
+    name: `data_${name}`,
+    widget: 'object',
+    fields: [
+      { name: 'value', label: 'Label', widget: 'string' },
+      { name: 'color', label: 'Color', widget: 'color' },
+    ],
+  } as const)
+
+export const graph = <N extends string, Data extends string[]>(
+  name: N,
+  ...data: Data
+) =>
+  ({
+    name: `graph_${name}`,
+    widget: 'object',
+    fields: [
+      styledStr('title'),
+      ...(data.map(graphData) as MapGraphFields<Data>),
+    ],
+  } as const)
 
 // export const urlPattern = pattern(
 //   // eslint-disable-next-line prettier/prettier

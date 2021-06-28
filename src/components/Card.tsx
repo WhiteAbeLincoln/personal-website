@@ -36,6 +36,11 @@ const useStyles = makeStyles(theme => ({
     flexGrow: 1,
     // we want text to be readable - optimal line length is 50-75 chars
     maxWidth: '70ch',
+    // reuse some of the linkStyles for nested links
+    '& a': {
+      '&:focus, &:hover': { outline: 0, textDecoration: 'underline' },
+      textDecoration: 'none',
+    }
   },
   footerStyles: {
     marginTop: 'auto',
@@ -50,6 +55,25 @@ const useStyles = makeStyles(theme => ({
     wordBreak: 'break-word',
   },
 }))
+
+function isInteractiveElement(target: HTMLElement): boolean {
+  const role = target.getAttribute('role')
+  return role === 'button'
+    || role === 'link'
+    || role === 'checkbox'
+    || role === 'form'
+    || role === 'navigation'
+    || role === 'search'
+    || role === 'tab'
+    || role === 'switch'
+    || target.getAttribute('onclick') != null
+    || target.getAttribute('href') != null
+    || (HTMLInputElement && target instanceof HTMLInputElement)
+    || (HTMLOptionElement && target instanceof HTMLOptionElement)
+    || (HTMLDetailsElement && target instanceof HTMLDetailsElement)
+    || target.classList.contains('aw-nested-interactive')
+    // || (HTMLDialogElement && target instanceof HTMLDialogElement)
+}
 
 const Card = ({
   link,
@@ -78,7 +102,8 @@ const Card = ({
       onMouseUp={e => {
         if (e.button !== 0) return
         const timeDiff = e.timeStamp - downTime
-        if (link && timeDiff < 200) {
+        const interactive = e.target instanceof HTMLElement && isInteractiveElement(e.target)
+        if (link && timeDiff < 200 && !interactive) {
           void navigate(link)
         }
       }}

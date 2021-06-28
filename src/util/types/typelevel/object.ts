@@ -90,3 +90,8 @@ export type ReplaceKeyPair<T, K, Match, RT, k = never> = T extends object
   : T
 
 export type MakePartial<P, K extends keyof P> = Omit<P, K> & { [k in K]?: P[k] }
+
+export type MatchesExact<V, T> = Matches<
+  V,
+  T & Record<Exclude<keyof V, keyof T>, never>
+>

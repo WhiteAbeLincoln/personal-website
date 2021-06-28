@@ -1,8 +1,10 @@
 ---
 templateKey: simple
 title: AskReddit Clustering
-summary: |
-  An exploration of clustering algorithms on top-level comments submitted to AskReddit.
+summary: >
+  An exploration of clustering algorithms on top-level comments submitted to
+  AskReddit.
+
   Created for CS4320 - Information Storage and Retrieval.
 tags:
   - School
@@ -11,12 +13,12 @@ tags:
 # AskReddit Clustering
 
 An exploration of clustering algorithms used to group responses to AskReddit posts.
-Created for CS4320 - Information Storage and Retrieval at Utah State Univeristy. Source code available on
+Created for CS4320 - Information Storage and Retrieval at Utah State University. Source code available on
 [GitHub](https://github.com/WhiteAbeLincoln/askreddit-clustering).
 
 ## Goal
 
-Many questions on r/AskReddit recieve simple or direct responses, where the first or only sentence answers the question.
+Many questions on r/AskReddit receive simple or direct responses, where the first or only sentence answers the question.
 
 I wanted to identify and group these responses by subject/similarity. I could then determine the number of unique responses,
 the number of responses in each category, and search for responses by subject.
@@ -27,7 +29,7 @@ We can store those results for search using an inverted index, where there is a 
 postings lists (the responses).
 
 To do this, we can either use a natural language method with the [Natural Language Toolkit](https://www.nltk.org/), or use clustering
-on the responses and use common phrases in those clusers as the topics. There are some problems with these methods though. Not all responses
+on the responses and use common phrases in those clusters as the topics. There are some problems with these methods though. Not all responses
 to the questions are simple, so the algorithm might choke on unexpected data. Categorization isn't at all useful if all responses are unique, since
 they would then each have different topics. We also need to strip markup, such as italics, bold, and bullet-points, but this may be useful
 semantic information that is lost. Finally, the different approaches for topic identification will be balances between
@@ -56,7 +58,7 @@ and low recall, while clustering may have high recall and low precision.
   <figcaption>
     <Typography variant="caption">
       A plot of k-means using multi-dimensional scaling and the cosine-similarity measure.
-      The data doesn't seem to be linearly seperable but the actual results were decent. It could be that this
+      The data doesn't seem to be linearly separable but the actual results were decent. It could be that this
       plotting method doesn't actually represent the behavior of the k-means algorithm, or the majority of the
       clusters do overlap, and any patterns seen in the data were incidental.
     </Typography>
@@ -79,5 +81,5 @@ perform well, but most topic terms had equal probability, leading to indistinct 
   evaluation.
 - Remove uninteresting/common words. Theoretically [TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) should account for this,
   but it didn't seem to work in practice.
-- Add a heirarchial algorithm to compare.
+- Add a hierarchical algorithm to compare.
 - Attempt proposed NLP approach, and explore the precision and recall differences.

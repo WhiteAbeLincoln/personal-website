@@ -1,4 +1,5 @@
 import CMS from 'netlify-cms-app'
+import { portfolioCollection } from './collections/portfolio'
 
 CMS.init({
   config: {
@@ -12,6 +13,8 @@ CMS.init({
     local_backend: process.env.NODE_ENV === 'development',
     media_folder: 'static/assets',
     public_folder: '/assets',
-    collections: [],
+    collections: [
+      portfolioCollection
+    ],
   },
 })

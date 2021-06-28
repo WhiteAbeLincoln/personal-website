@@ -6,11 +6,14 @@ export type And<A extends SB, B extends SB> = A extends '1'
     ? '1'
     : '0'
   : '0'
+export type Every<Ands extends SB[]> = Equal<Ands[number], '1'>
+
 export type Or<A extends SB, B extends SB> = A extends '1'
   ? '1'
   : B extends '1'
   ? '1'
   : '0'
+export type Some<Ors extends SB[]> = '1' extends Ors[number] ? '1' : '0'
 
 export type Matches<V, T> = [V] extends [T] ? '1' : '0'
 export type Equal<A, B> = And<Matches<A, B>, Matches<B, A>>

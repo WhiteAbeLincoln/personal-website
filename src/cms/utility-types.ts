@@ -4,6 +4,8 @@ import {
   NumberWidgetField,
   ObjectWidgetField,
   ListWidgetField,
+  StaticListWidgetField,
+  VariableListWidgetField,
   RelationWidgetField,
   HiddenWidgetField,
   FolderCollection,
@@ -11,18 +13,26 @@ import {
   SelectWidgetField,
 } from 'netlify-cms-app'
 import {
+  Indices,
+  Primitive,
   If,
   Or,
+  Some,
   Equal,
   Matches,
   Not,
   AllPaths,
   FollowPath,
   UnionToIntersection,
-} from '@util/types'
+  MatchesExact,
+} from '../util/types'
+import {
+  TypogStylesData,
+  WidgetStylesData,
+} from './utility-fields'
 
 type WidgetTypeMapBase<F extends Field> = {
-  [k in keyof Exclude<WidgetFieldMap, 'number'>]: Exclude<
+  [k in Exclude<keyof WidgetFieldMap, 'number' | 'list'>]: Exclude<
     WidgetFieldMap[k]['default'],
     undefined
   >
@@ -34,6 +44,9 @@ type WidgetTypeMapBase<F extends Field> = {
         string
       >
     : Exclude<WidgetFieldMap['number']['default'], undefined>
+  list: F extends StaticListWidgetField
+    ? Exclude<StaticListWidgetField['default'], 'undefined'>
+    : unknown
 }
 
 type WidgetTypeMap<F extends Field> = Omit<
@@ -67,7 +80,7 @@ type GetSelectFieldType<F extends SelectWidgetField> = GetPhantomType<
   ? NonNullable<F['default']>
   : GetPhantomType<F['options']>
 
-type GetListFieldType<F extends ListWidgetField> = If<
+type GetStaticListFieldType<F extends StaticListWidgetField> = If<
   Not<Equal<F['field'], unknown>>,
   Array<DataForField<Exclude<F['field'], undefined>>>,
   If<
@@ -76,6 +89,27 @@ type GetListFieldType<F extends ListWidgetField> = If<
     WidgetTypeMapBase<F>['list']
   >
 >
+
+type TypeKey<T extends { typeKey?: string }> = If<
+  Or<
+    Matches<undefined, T['typeKey']>,
+    Or<Matches<string, T['typeKey']>, Matches<string | undefined, T['typeKey']>>
+  >,
+  'type',
+  Exclude<T['typeKey'], undefined>
+>
+
+type GetVariableListFieldType<
+  F extends VariableListWidgetField,
+  types = GetObjectFieldType<{ fields: F['types'] }>,
+  key extends string = TypeKey<F>
+> = Array<{ [t in keyof types]: { [k in key]: t } & types[t] }[keyof types]>
+
+type GetListFieldType<
+  F extends ListWidgetField
+> = F extends VariableListWidgetField
+  ? GetVariableListFieldType<F>
+  : GetStaticListFieldType<F>
 
 type GetRelationFieldType<
   F extends RelationWidgetField
@@ -98,9 +132,16 @@ export type GetObjectFieldType<
 // `required`: specify as `false` to make a field optional; defaults to `true`
 type DataForObjectField<F> = F extends Field
   ? If<
-      Or<Equal<F['required'], true>, Matches<undefined, F['required']>>,
-      { [k in F['name']]: DataForField<F> },
-      { [k in F['name']]?: DataForField<F> }
+      Equal<F['widget'], 'list'>,
+      // even when list widgets are required, an empty list is not added
+      // to the output data - see https://github.com/netlify/netlify-cms/issues/2613
+      // only solution is to always treat them as optional in the type
+      { [k in F['name']]?: DataForField<F> },
+      If<
+        Or<Equal<F['required'], true>, Matches<undefined, F['required']>>,
+        { [k in F['name']]: DataForField<F> },
+        { [k in F['name']]?: DataForField<F> }
+      >
     >
   : null
 
@@ -111,6 +152,62 @@ export type FolderCollectionData<
 export type FileCollectionEntryData<
   C extends FileCollectionEntry
 > = GetObjectFieldType<C>
+
+type TemplateLiteralPart = string | number | bigint | boolean | null | undefined
+export type LabelToValue<
+  T extends TemplateLiteralPart
+> = T extends `label_${infer R}` ? `value_${R}` : never
+
+type NonObj = Primitive | ((...args: any) => any)
+type BuildParent<
+  Parent extends TemplateLiteralPart,
+  Child extends keyof any
+> = `${Parent extends '' ? '' : `${Parent}.`}${Child & TemplateLiteralPart}`
+
+type GetStyleKeysArr<
+  Obj extends any[],
+  Parent extends TemplateLiteralPart = ''
+> = NonNullable<
+  {
+    [k in Indices<Obj>]: GetStyleKeys<Obj[k], BuildParent<Parent, k>>
+  }[Indices<Obj>]
+>
+
+type GetStyleKeysObj<
+  Obj extends object,
+  Parent extends TemplateLiteralPart = ''
+> = If<
+  Matches<Obj, NonObj>,
+  never,
+  NonNullable<
+    {
+      [k in keyof Obj]: GetStyleKeys<Obj[k], BuildParent<Parent, k>>
+    }[keyof Obj]
+  >
+>
+
+/**
+ * Given a cms object, creates a union of keys that should
+ * hold style information
+ */
+export type GetStyleKeys<Obj, Parent extends TemplateLiteralPart = ''> = If<
+  Matches<NonNullable<Obj>, NonObj>,
+  never,
+  If<
+    Some<
+      [
+        MatchesExact<NonNullable<Obj>, WidgetStylesData>,
+        MatchesExact<NonNullable<Obj>, TypogStylesData>,
+      ]
+    >,
+    Parent,
+    [NonNullable<Obj>] extends [any[]]
+      ? GetStyleKeysArr<NonNullable<Obj>, Parent>
+      : [NonNullable<Obj>] extends [object]
+      ? GetStyleKeysObj<NonNullable<Obj>, Parent>
+      : never
+  >
+>
 
 declare module 'netlify-cms-app' {
   export interface EditorComponent<Fields extends readonly Field[]> {

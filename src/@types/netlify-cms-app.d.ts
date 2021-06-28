@@ -98,7 +98,7 @@ declare module 'netlify-cms-app' {
     collapsed?: boolean
   }
 
-  export interface ListWidgetField extends FieldBase {
+  export interface StaticListWidgetField extends FieldBase {
     widget: 'list'
     default?: string[]
     allow_add?: boolean
@@ -107,6 +107,16 @@ declare module 'netlify-cms-app' {
     collapsed?: boolean
   }
 
+  export interface VariableListWidgetField extends FieldBase {
+    widget: 'list'
+    summary?: string
+    typeKey?: string
+    types: ObjectWidgetField[] | readonly ObjectWidgetField[]
+    allow_add?: boolean
+    collapsed?: boolean
+  }
+
+  export type ListWidgetField = VariableListWidgetField | StaticListWidgetField
   export interface TextWidgetField extends FieldBase {
     widget: 'text'
     default?: string
@@ -158,7 +168,9 @@ declare module 'netlify-cms-app' {
     max?: number
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface SelectWidgetString extends SelectWidgetFieldBase<string> {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface SelectWidgetObject
     extends SelectWidgetFieldBase<{ label: string; value: unknown }> {}
 
@@ -192,7 +204,10 @@ declare module 'netlify-cms-app' {
 
   export type Field = WidgetFieldMap[keyof WidgetFieldMap]
 
-  export type WidgetSerializer = unknown
+  export type WidgetSerializer<In = unknown, Out = unknown> = {
+    serialize: (value: In) => Out
+    deserialize: (value: Out) => In
+  }
   export interface EditorComponent<Fields extends readonly Field[]> {
     id: string
     label: string
@@ -214,7 +229,7 @@ declare module 'netlify-cms-app' {
     label_singular?: string
     description?: string
     delete?: boolean
-    extension?: 'yml' | 'yaml' | 'toml' | 'json' | 'md' | 'markdown' | 'html'
+    extension?: string // 'yml' | 'yaml' | 'toml' | 'json' | 'md' | 'markdown' | 'html'
     format?:
       | 'yml'
       | 'yaml'
@@ -390,9 +405,9 @@ declare module 'netlify-cms-app' {
       component: EditorComponent<Fields>,
     ) => void
     getEditorComponents: () => Map<string, EditorComponent<any>>
-    registerWidgetValueSerializer: (
+    registerWidgetValueSerializer: <In, Out>(
       name: string,
-      serializer: WidgetSerializer,
+      serializer: WidgetSerializer<In, Out>,
     ) => void
     getWidgetValueSerializer: (name: string) => WidgetSerializer | undefined
     registerBackend: (name: string, backend: BackendClass<any[]>) => void

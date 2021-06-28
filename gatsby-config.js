@@ -6,11 +6,12 @@ module.exports = {
     siteUrl: 'https://abewhite.dev',
   },
   plugins: [
+    'gatsby-plugin-typescript',
     {
       resolve: 'gatsby-plugin-netlify-cms',
       options: {
         enableIdentityWidget: false,
-        modulePath: `./src/cms/cms.ts`,
+        modulePath: `${__dirname}/src/cms/cms.ts`,
         manualInit: true,
       },
     },
@@ -51,5 +52,9 @@ module.exports = {
       __key: 'page_data',
     },
     'gatsby-plugin-mdx',
+    {
+      resolve: 'gatsby-transformer-remark-frontmatter',
+      options: { preset: 'Mdx' }
+    }
   ],
 }

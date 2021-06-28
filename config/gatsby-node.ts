@@ -27,8 +27,6 @@ const config: GatsbyNode = {
           value: relative,
         })
       }
-    } else {
-      console.log(node.internal)
     }
   },
   createPages: ({ actions: { createPage }, graphql }) => {
@@ -99,6 +97,7 @@ const config: GatsbyNode = {
     type MdxFrontmatter @infer {
       templateKey: String
       seo: SEO
+      summary: String @md
     }
     type Mdx implements Node @infer {
       frontmatter: MdxFrontmatter

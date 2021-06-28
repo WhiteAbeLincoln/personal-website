@@ -44,6 +44,8 @@ export type ValueOf<T> = T[keyof T]
 // from https://github.com/microsoft/TypeScript/issues/13298#issuecomment-654906323
 export type MustInclude<T, U extends T[]> = [T] extends [ValueOf<U>] ? U : never
 
+export type Primitive = string | number | boolean | bigint | symbol | undefined
+
 export type ToPrimitive<T> = T extends string
   ? string | T
   : T extends number

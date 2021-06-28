@@ -38,7 +38,6 @@ export const modularTypography = (
   const mediaQueries = breakpoints.map((curr, i) => {
     const next = breakpoints[i + 1] as BreakpointKey | undefined
     const s = scale * betweenScale ** (i + 1)
-    console.log(curr, s)
     return {
       query: (next == null ? bp_gt(curr) : bp_between(curr, next))(theme),
       scale: s

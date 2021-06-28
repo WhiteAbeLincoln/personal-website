@@ -11,13 +11,16 @@ import { graphql } from 'gatsby'
 import { PortfolioPagesQuery } from '@src/graphql.gen'
 import { isTruthy } from '@util/functional/predicates'
 import Layout from '@comps/Layout'
+import { MDXRenderer } from 'gatsby-plugin-mdx'
 
-const MANUAL_ITEMS: Array<{
+type Item = {
   title: string
-  summary: string
+  summary: string | { body: string }
   to: string
   tags: string[]
-}> = []
+}
+
+const MANUAL_ITEMS: Item[] = []
 
 const useStyles = makeStyles(theme => ({
   cards: {
@@ -34,9 +37,7 @@ export const PortfolioTemplate = ({
   className,
   items,
   ...props
-}: {
-  items: Array<{ title: string; summary: string; to: string; tags: string[] }>
-} & ClassesProp<typeof useStyles>) => {
+}: { items: Item[] } & ClassesProp<typeof useStyles>) => {
   const classes = useStyles(props)
 
   const tags = [
@@ -93,7 +94,11 @@ export const PortfolioTemplate = ({
                 </>
               }
             >
-              <Typography paragraph>{i.summary}</Typography>
+              {typeof i.summary === 'string' ? (
+                <Typography paragraph>{i.summary}</Typography>
+              ) : (
+                <MDXRenderer>{i.summary.body}</MDXRenderer>
+              )}
             </Card>
           )}
         </CardList>
@@ -137,7 +142,9 @@ export const pageQuery = graphql`
         slug
         frontmatter {
           title
-          summary
+          summary {
+            body
+          }
           tags
         }
       }
@@ -151,7 +158,9 @@ export const pageQuery = graphql`
         slug
         frontmatter {
           title
-          summary
+          summary {
+            body
+          }
           tags
         }
       }
