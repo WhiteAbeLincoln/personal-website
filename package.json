@@ -17,6 +17,7 @@
     "types-gatsby": "graphql-codegen -c ./codegen-gatsby.yml"
   },
   "dependencies": {
+    "@emotion/react": "^11.7.0",
     "@fontsource/fira-code": "^4.4.5",
     "@fontsource/montserrat": "^4.4.5",
     "@material-ui/styles": "^4.11.4",

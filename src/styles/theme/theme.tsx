@@ -1,5 +1,6 @@
 import React, { CSSProperties, PropsWithChildren } from 'react'
 import { DefaultTheme, ThemeProvider } from '@material-ui/styles'
+import { ThemeProvider as EmotionTheme  } from '@emotion/react'
 import { RequireKeys } from '@util/types'
 import { modularTypography } from './theme-utils'
 
@@ -27,54 +28,67 @@ export type PaletteColors = {
   contrastText: string
 }
 
-declare module '@material-ui/styles/defaultTheme' {
-  export interface DefaultTheme {
-    spacing?: number | number[]
-    breakpoints: {
-      values: Record<BreakpointKey, number>
-      unit?: 'px' | 'em' | 'rem'
-      step?: number
+export interface MyTheme {
+  spacing?: number | number[]
+  breakpoints: {
+    values: Record<BreakpointKey, number>
+    unit?: 'px' | 'em' | 'rem'
+    step?: number
+  }
+  palette: {
+    type: 'light' | 'dark'
+    common: {
+      white: string
+      black: string
     }
-    palette: {
-      type: 'light' | 'dark'
-      common: {
-        white: string
-        black: string
-      }
-      primary: PaletteColors
-      secondary: PaletteColors
-      error: Pick<PaletteColors, 'main' | 'contrastText'>
-      warning: Pick<PaletteColors, 'main' | 'contrastText'>
-      info: Pick<PaletteColors, 'main' | 'contrastText'>
-      success: Pick<PaletteColors, 'main' | 'contrastText'>
-      text: {
-        primary: string
-        secondary: string
-        disabled: string
-        hint: string
-      }
-      background: {
-        default: string
-      }
+    primary: PaletteColors
+    secondary: PaletteColors
+    error: Pick<PaletteColors, 'main' | 'contrastText'>
+    warning: Pick<PaletteColors, 'main' | 'contrastText'>
+    info: Pick<PaletteColors, 'main' | 'contrastText'>
+    success: Pick<PaletteColors, 'main' | 'contrastText'>
+    text: {
+      primary: string
+      secondary: string
+      disabled: string
+      hint: string
     }
-    typography: {
-      [k in TypographyVariant]: RequireKeys<
-        Pick<
-          CSSProperties,
-          | 'fontFamily'
-          | 'fontWeight'
-          | 'fontSize'
-          | 'lineHeight'
-          | 'letterSpacing'
-          | 'textTransform'
-        >,
-        'fontFamily' | 'fontSize'
-      >
-    } & {
-      gutter: CSSProperties['fontSize']
-      fontWeightBold: CSSProperties['fontWeight']
+    background: {
+      default: string
     }
   }
+  typography: {
+    [k in TypographyVariant]: RequireKeys<
+      Pick<
+        CSSProperties,
+        | 'fontFamily'
+        | 'fontWeight'
+        | 'fontSize'
+        | 'lineHeight'
+        | 'letterSpacing'
+        | 'textTransform'
+      >,
+      'fontFamily' | 'fontSize'
+    >
+  } & {
+    gutter: CSSProperties['fontSize']
+    fontWeightBold: CSSProperties['fontWeight']
+  },
+  border: {
+    baseWidth: string
+    focusedWidth: string
+    style: CSSProperties['borderStyle']
+  }
+}
+
+export { MyTheme as Theme }
+
+declare module '@material-ui/styles/defaultTheme' {
+  export interface DefaultTheme extends MyTheme {}
+}
+
+declare module '@emotion/react' {
+  export interface Theme extends MyTheme {}
 }
 
 const headlineFamily = '"Fira Code", monospace'
@@ -223,6 +237,11 @@ export const themeBase = {
       contrastText: '#fff',
     },
   },
+  border: {
+    baseWidth: `${1 / 8}rem`,
+    focusedWidth: `${3 / 16}rem`,
+    style: 'solid'
+  }
 } as const
 
 export const defaultThemeModular = {
@@ -242,7 +261,7 @@ export const markdownTheme = modularTypography(themeBase, {
 export const DefaultThemeProvider = ({
   children,
 }: PropsWithChildren<unknown>) => (
-  <ThemeProvider theme={defaultTheme}>{children}</ThemeProvider>
+  <EmotionTheme theme={defaultTheme}>
+    <ThemeProvider theme={defaultTheme}>{children}</ThemeProvider>
+  </EmotionTheme>
 )
-
-export { DefaultTheme as Theme }

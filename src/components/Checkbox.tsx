@@ -1,67 +1,44 @@
+/** @jsx jsx */
 import React from 'react'
 import Typography, { TypographyProps } from '@comps/typography'
 import { forwardRef } from 'react'
-import { createStyles, withStyles } from '@material-ui/styles'
-import { capitalize, clsx } from '@util/util'
-import { ClassesProp } from '@util/types'
-import { spacing, Theme } from '@src/styles/theme'
+import { getBorderAndColor, getFocusedBorder, spacing, Theme, withCSSGetter } from '@src/styles/theme'
+import { css, jsx, } from '@emotion/react'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'start',
-      '& $input:checked + $icon': {
-        '& $iconCheck': {
-          stroke: 'currentColor',
-        },
-      },
-      '& $input:hover + $icon': {
-        borderWidth: `${3 / 16}rem`,
-      },
-      '& $input:focus + $icon': {
-        borderWidth: `${3 / 16}rem`,
-      },
-      '& $input:focus:not(:focus-visible) + $icon': {
-        outline: 'none',
-      },
-    },
-    input: {
-      position: 'absolute',
-      width: '1em',
-      height: '1em',
-      margin: 0,
-      outline: 0,
-      opacity: 0,
-    },
-    icon: {
-      border: `${1 / 8}rem solid black`,
-      width: '1em',
-      height: '1em',
-      marginRight: spacing(theme)(1),
-      marginTop: '.1em',
-      zIndex: 2,
-      '*': {
-        transition: 'all 0.1s',
-      },
-    },
-    iconRect: {},
-    iconCheck: {},
-    label: {
-      fontSize: 'inherit',
-    },
-    colorPrimary: {
-      color: theme.palette.primary.main,
-    },
-    colorSecondary: {
-      color: theme.palette.secondary.main,
-    },
-    colorInherit: {
-      color: 'inherit',
-    },
-    disabled: {},
-  })
+const inputStyles = withCSSGetter(getFocusedBorder, ({ focusedBorder, notFocusedBorder }) =>
+  css`
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    margin: 0;
+    outline: 0;
+    opacity: 0;
+    &:hover:enabled + svg, &:focus + svg {
+      ${focusedBorder}
+    }
+    &:focus:not(:focus-visible):not(:hover) + svg {
+      ${notFocusedBorder}
+    }
+    &:checked + svg polyline {
+      stroke: currentColor;
+    }
+  `
+)
+
+const iconStyles = withCSSGetter(getBorderAndColor, ({ baseBorder, theme, color }) =>
+  css`
+    ${baseBorder}
+    width: 1em;
+    height: 1em;
+    margin-right: ${spacing(theme)(1)};
+    margin-top: 0.1em;
+    z-index: 2;
+    & * {
+      transition: all 0.1s;
+    }
+    color: ${color};
+  `
+)
 
 type Props = {
   label?: React.ReactNode
@@ -74,56 +51,47 @@ type Props = {
   color?: 'inherit' | 'primary' | 'secondary'
 } & JSX.IntrinsicElements['input']
 
-const Checkbox = forwardRef<HTMLInputElement, Props>(function Checkbox(
+export default forwardRef<HTMLInputElement, Props>(function Checkbox(
   {
     label,
     labelProps,
     textProps,
-    disabled: disabledProp,
-    checked,
-    name,
-    value,
-    classes = {},
-    className,
     color = 'primary',
     ...props
-  }: Props & ClassesProp<typeof styles>,
+  }: Props,
   ref,
 ) {
   return (
-    <label className={clsx(classes.root, className)} {...labelProps}>
+    <label
+      css={css`
+        cursor: pointer;
+        display: flex;
+        align-items: start;
+      `}
+      {...labelProps}
+    >
       <input
         type="checkbox"
-        className={classes.input}
-        disabled={disabledProp}
-        checked={checked}
-        name={name}
-        value={value}
+        css={inputStyles()}
         ref={ref}
         {...props}
       />
       <svg
-        className={clsx(
-          classes.icon,
-          classes[`color${capitalize(color)}` as const],
-        )}
+        css={iconStyles({ color })}
         viewBox="0 0 32 32"
         aria-hidden="true"
         focusable="false"
       >
         <polyline
-          className={classes.iconCheck}
           points="4,14 12,23 28,5"
           stroke="transparent"
           strokeWidth="4"
           fill="none"
         />
       </svg>
-      <Typography className={classes.label} component="span" {...textProps}>
+      <Typography css={css`font-size: inherit;`} component="span" {...textProps}>
         {label}
       </Typography>
     </label>
   )
 })
-
-export default withStyles(styles, { name: 'Checkbox' })(Checkbox)
