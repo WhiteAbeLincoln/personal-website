@@ -1,21 +1,17 @@
-import { useTheme } from '@material-ui/styles'
-import { Theme } from '@src/styles/theme/theme'
 import { useEffect, useState } from 'react'
+import { LayoutTheme, layoutTheme } from '@src/styles'
 
 export default function useMediaQuery(
-  input: string | ((theme: Theme) => string),
+  input: string | ((theme: LayoutTheme) => string),
   options: {
     defaultMatches?: boolean
     matchMedia?: (query: string) => MediaQueryList
   } = {},
 ) {
-  const theme = useTheme()
-
   // gets the query and removes @media and any trailing spaces
-  const query = (typeof input === 'string' ? input : input(theme)).replace(
-    /^@media +/m,
-    '',
-  )
+  const query = (
+    typeof input === 'string' ? input : input(layoutTheme)
+  ).replace(/^@media +/m, '')
 
   const hasMatchMedia =
     typeof window !== 'undefined' && typeof window.matchMedia !== 'undefined'

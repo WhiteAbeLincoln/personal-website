@@ -19,14 +19,10 @@ module.exports = {
       resolve: 'gatsby-plugin-alias-imports',
       options: {
         alias: {
-          '@util': './src/util',
-          '@comps': './src/components',
-          '@styles': './src/styles',
           '@src': './src',
         },
       },
     },
-    'gatsby-plugin-material-ui',
     {
       resolve: 'gatsby-plugin-google-analytics',
       options: {
@@ -54,7 +50,8 @@ module.exports = {
     'gatsby-plugin-mdx',
     {
       resolve: 'gatsby-transformer-remark-frontmatter',
-      options: { preset: 'Mdx' }
-    }
+      options: { preset: 'Mdx' },
+    },
+    'gatsby-plugin-linaria',
   ],
 }

@@ -13,8 +13,6 @@ CMS.init({
     local_backend: process.env.NODE_ENV === 'development',
     media_folder: 'static/assets',
     public_folder: '/assets',
-    collections: [
-      portfolioCollection
-    ],
+    collections: [portfolioCollection],
   },
 })

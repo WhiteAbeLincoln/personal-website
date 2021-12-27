@@ -1,8 +1,8 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
-import Layout from '@comps/Layout'
-import Container from '@comps/Container'
-import { H1, P } from '@comps/typography/Elements'
+import Container from '@src/components/Container'
+import Layout from '@src/components/Layout'
+import { H1, P } from '@src/components/typography/Elements'
 
 const Contact = () => (
   <>

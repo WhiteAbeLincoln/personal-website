@@ -3,10 +3,10 @@
  * @see MUI_LICENSE
  */
 import React from 'react'
-import { StyledComponentProps } from '@material-ui/styles'
+import type { ClassesProp } from '@src/styles'
 
 export type OverriddenComponent<M extends OverridableTypeMap> = <
-  C extends React.ElementType
+  C extends React.ElementType,
 >(
   props: {
     /**
@@ -25,9 +25,8 @@ export type DefaultComponent<M extends OverridableTypeMap> = (
  *
  * Adjusts valid props based on the type of `component`.
  */
-export type OverridableComponent<
-  M extends OverridableTypeMap
-> = OverriddenComponent<M> & DefaultComponent<M>
+export type OverridableComponent<M extends OverridableTypeMap> =
+  OverriddenComponent<M> & DefaultComponent<M>
 
 /**
  * Props if `component={Component}` is NOT used.
@@ -41,14 +40,13 @@ export type OverridableTypeMap = {
   defaultComponent: React.ElementType
   classKey: string
 }
+
 /**
  * Props that are valid for overridable components styled with material-ui/styles
  */
-export interface CommonProps<M extends OverridableTypeMap>
-  extends StyledComponentProps<M['classKey']> {
-  className?: string
-  style?: React.CSSProperties
-}
+export type CommonProps<M extends OverridableTypeMap> = ClassesProp<
+  M['classKey']
+>
 
 /**
  * Props defined on the component
@@ -58,5 +56,5 @@ export type BaseProps<M extends OverridableTypeMap> = M['props'] &
 
 export type OverrideProps<
   M extends OverridableTypeMap,
-  C extends React.ElementType
+  C extends React.ElementType,
 > = BaseProps<M> & Omit<React.ComponentPropsWithRef<C>, keyof CommonProps<M>>

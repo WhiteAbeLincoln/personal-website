@@ -1,10 +1,10 @@
-import React from 'react'
-import { OverrideProps } from '@util/types/OverridableComponent'
+import React, { forwardRef } from 'react'
 import Link, { LinkTypeMap } from './Link'
 import LinkWrapper from './LinkWrapper'
+import { OverrideProps } from '@src/util/types/OverridableComponent'
 
 export type GLinkProps = OverrideProps<LinkTypeMap, typeof LinkWrapper>
-const GLink = React.forwardRef<HTMLAnchorElement, GLinkProps>(function GLink(
+const GLink = forwardRef<HTMLAnchorElement, GLinkProps>(function GLink(
   props,
   ref,
 ) {

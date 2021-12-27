@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // tslint:disable-next-line: no-implicit-dependencies
-import { ClassNameMap, Styles } from '@material-ui/styles'
 import { Equal, If, Matches } from './typelevel/boolean'
 import { Add } from './typelevel/number'
 import { Prepend, Reverse, Tail } from './typelevel/tuple'
@@ -58,7 +57,8 @@ export type ToPrimitive<T> = T extends string
   ? {
       [k in keyof T]: ToPrimitive<T[k]>
     }
-  : T extends object
+  : // eslint-disable-next-line @typescript-eslint/ban-types
+  T extends object
   ? {
       [k in keyof T]: ToPrimitive<T[k]>
     }
@@ -77,7 +77,7 @@ export type AllPaths<
   K extends keyof T = keyof T,
   Path extends (keyof any)[] = [],
   Count extends number = 0,
-  Leaves = ObjectLeaves
+  Leaves = ObjectLeaves,
 > = {
   [k in K]: T[k] extends Leaves
     ? Reverse<Prepend<Path, k>>
@@ -114,31 +114,7 @@ export type FollowPath_<T, P extends (keyof any)[]> = P extends [keyof T]
   : never
 export type FollowPath<T, K extends AllPaths<T>> = FollowPath_<T, K>
 
-export type StylesHook<
-  Props extends object = {},
-  ClassKey extends string = string
-> = keyof Props extends never
-  ? (props?: unknown) => ClassNameMap<ClassKey>
-  : (props: Props) => ClassNameMap<ClassKey>
-
-type _ClassesProp<Key extends string, Obj, Req = false> = {
-  [k in Key]?: Req extends true
-    ? Required<{ [k in keyof Obj]?: string }>
-    : { [k in keyof Obj]?: string }
-}
-export type ClassesProp<
-  UseStyles extends
-    | ((props?: object) => Partial<{ [k: string]: string }>)
-    | StylesHook<any, any>
-    | Partial<Record<string, Record<string, unknown>>>
-    | Styles<any, any, any>,
-  Req = false,
-  Key extends string = 'classes',
-  Obj = UseStyles extends (...args: any[]) => any
-    ? ReturnType<UseStyles>
-    : UseStyles
-> = (Req extends true
-  ? Required<_ClassesProp<Key, Obj, Req>>
-  : _ClassesProp<Key, Obj, Req>) & {
-  className?: string
-}
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type IndexSignatureHack<T> = T extends object
+  ? { [k in keyof T]: IndexSignatureHack<T[k]> }
+  : T

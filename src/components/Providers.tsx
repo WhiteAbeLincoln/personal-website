@@ -1,11 +1,11 @@
-import React, { PropsWithChildren } from 'react'
-import { DefaultThemeProvider } from '@src/styles/theme/theme'
-import CSSBaseline from '@styles/theme/CSSBaseline'
 import { MDXProvider, MDXProviderComponents } from '@mdx-js/react'
-import { P, Pre } from './typography/Elements'
+import React, { PropsWithChildren } from 'react'
 import Link from './Link'
-import { partial } from '@util/react-util'
 import Typography from './typography'
+import { P, Pre } from './typography/Elements'
+import { DefaultThemeProvider } from '@src/styles'
+import baselineCSS from '@src/styles/css-baseline'
+import { partial } from '@src/util/react-util'
 
 const components: MDXProviderComponents = {
   p: P,
@@ -44,9 +44,10 @@ const components: MDXProviderComponents = {
   Typography,
 }
 
-export default ({ children }: PropsWithChildren<unknown>) => (
-  <DefaultThemeProvider>
-    <CSSBaseline />
+const Providers = ({ children }: PropsWithChildren<unknown>) => (
+  <DefaultThemeProvider className={baselineCSS} root>
     <MDXProvider components={components}>{children}</MDXProvider>
   </DefaultThemeProvider>
 )
+
+export default Providers

@@ -1,28 +1,26 @@
-import { makeStyles } from '@material-ui/styles'
-import { spacing } from '@src/styles/theme'
-import { ClassesProp } from '@util/types'
-import { clsx } from '@util/util'
+import { css } from '@linaria/core'
 import React, { PropsWithChildren } from 'react'
 import Header from './Header'
+import { spacing } from '@src/styles'
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    display: 'flex',
-    padding: spacing(theme)(1),
-    flexFlow: 'column nowrap',
-  },
-}))
+const styles = {
+  root: css`
+    display: flex;
+    padding: ${spacing(1)};
+    flex-flow: column nowrap;
+  `,
+}
 
 const Layout = ({
   children,
-  className,
   ...props
-}: PropsWithChildren<ClassesProp<typeof useStyles>>) => {
-  const classes = useStyles(props)
+}: PropsWithChildren<{ className?: string }>) => {
   return (
     <>
       <Header />
-      <main className={clsx(classes.root, className)}>{children}</main>
+      <main className={styles.root} {...props}>
+        {children}
+      </main>
     </>
   )
 }

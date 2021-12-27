@@ -1,4 +1,10 @@
-import { bodyField, mdxCollection, seoField, templateKey, titleField } from '../utility-fields';
+import {
+  bodyField,
+  mdxCollection,
+  seoField,
+  templateKey,
+  titleField,
+} from '../utility-fields'
 
 export const portfolioCollection = {
   ...mdxCollection,
@@ -14,14 +20,14 @@ export const portfolioCollection = {
       name: 'summary',
       label: 'Summary',
       widget: 'markdown',
-      required: false
+      required: false,
     },
     {
       name: 'tags',
       label: 'Tags',
-      widget: 'list'
+      widget: 'list',
     },
     bodyField,
-    seoField
-  ]
+    seoField,
+  ],
 } as const

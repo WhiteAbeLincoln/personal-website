@@ -1,77 +1,89 @@
 /*
- * Taken from material-ui
+ * Adapted from material-ui
  * @see MUI_LICENSE
  */
-import React from 'react'
-import { bp_gt, BreakpointKey, spacing, Theme } from '@styles/theme'
-import { createStyles, CSSProperties, withStyles } from '@material-ui/styles'
-import { capitalize, clsx, entries } from '@util/util'
+import { css, CSSProperties as CSSProps } from '@linaria/core'
+import React, { forwardRef } from 'react'
+import {
+  BreakpointKey,
+  spacing,
+  bp_gt,
+  layoutTheme,
+  clsx,
+  withStyles,
+  WithStyles,
+} from '@src/styles'
+import { capitalize, entries } from '@src/util'
 import {
   OverridableComponent,
   OverrideProps,
-} from '@util/types/OverridableComponent'
+} from '@src/util/types/OverridableComponent'
 
-export const styles = (theme: Theme) =>
-  createStyles({
-    /* Styles applied to the root element. */
-    root: {
-      width: '100%',
-      marginLeft: 'auto',
-      boxSizing: 'border-box',
-      marginRight: 'auto',
-      paddingLeft: spacing(theme)(2),
-      paddingRight: spacing(theme)(2),
-      display: 'block', // Fix IE 11 layout when used with main.
-      [bp_gt('sm')(theme)]: {
-        paddingLeft: spacing(theme)(3),
-        paddingRight: spacing(theme)(3),
-      },
-    },
-    /* Styles applied to the root element if `disableGutters={true}`. */
-    disableGutters: {
-      paddingLeft: 0,
-      paddingRight: 0,
-    },
-    /* Styles applied to the root element if `fixed={true}`. */
-    fixed: entries(theme.breakpoints.values).reduce((acc, [key, value]) => {
-      if (value !== 0) {
-        acc[bp_gt(key)(theme)] = { maxWidth: value }
-      }
-      return acc
-    }, {} as CSSProperties),
-    /* Styles applied to the root element if `maxWidth="xs"`. */
-    maxWidthXs: {
-      [bp_gt('xs')(theme)]: {
-        maxWidth: Math.max(theme.breakpoints.values.xs, 444),
-      },
-    },
-    /* Styles applied to the root element if `maxWidth="sm"`. */
-    maxWidthSm: {
-      [bp_gt('sm')(theme)]: {
-        maxWidth: theme.breakpoints.values.sm,
-      },
-    },
-    /* Styles applied to the root element if `maxWidth="md"`. */
-    maxWidthMd: {
-      [bp_gt('md')(theme)]: {
-        maxWidth: theme.breakpoints.values.md,
-      },
-    },
-    /* Styles applied to the root element if `maxWidth="lg"`. */
-    maxWidthLg: {
-      [bp_gt('lg')(theme)]: {
-        maxWidth: theme.breakpoints.values.lg,
-      },
-    },
-    /* Styles applied to the root element if `maxWidth="xl"`. */
-    maxWidthXl: {
-      [bp_gt('xl')(theme)]: {
-        maxWidth: theme.breakpoints.values.xl,
-      },
-    },
-  })
+const styles = {
+  /* Styles applied to the root element. */
+  root: css`
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+    padding-left: ${spacing(2)};
+    padding-right: ${spacing(2)};
+    display: block;
+    ${bp_gt('sm')} {
+      padding-left: ${spacing(3)};
+      padding-right: ${spacing(3)};
+    }
+  `,
+  /* Styles applied to the root element if `disableGutters={true}`. */
+  disableGutters: css`
+    padding-left: 0;
+    padding-right: 0;
+  `,
+  /* Styles applied to the root element if `fixed={true}`. */
+  fixed: css`
+    ${entries(layoutTheme.breakpoints.values).reduce((acc, [key, value]) => {
+    if (value !== 0) {
+      acc[bp_gt(key)] = { maxWidth: value }
+    }
+    return acc
+  }, {} as CSSProps)}
+  `,
+  /* Styles applied to the root element if `maxWidth="xs"`. */
+  maxWidthXs: css`
+    ${bp_gt('xs')} {
+      max-width: ${Math.max(layoutTheme.breakpoints.values.xs, 444)}${layoutTheme.breakpoints.unit};
+    }
+  `,
+  /* Styles applied to the root element if `maxWidth="sm"`. */
+  maxWidthSm: css`
+    ${bp_gt('sm')} {
+      max-width: ${layoutTheme.breakpoints.values.sm}${layoutTheme.breakpoints.unit};
+    }
+  `,
+  /* Styles applied to the root element if `maxWidth="md"`. */
+  maxWidthMd: css`
+    ${bp_gt('md')} {
+      max-width: ${layoutTheme.breakpoints.values.md}${layoutTheme.breakpoints.unit};
+    }
+  `,
+  /* Styles applied to the root element if `maxWidth="lg"`. */
+  maxWidthLg: css`
+    ${bp_gt('lg')} {
+      max-width: ${layoutTheme.breakpoints.values.lg}${layoutTheme.breakpoints.unit};
+    }
+  `,
+  /* Styles applied to the root element if `maxWidth="xl"`. */
+  maxWidthXl: css`
+    ${bp_gt('xl')} {
+      max-width: ${layoutTheme.breakpoints.values.xl}${layoutTheme.breakpoints.unit};
+    }
+  `,
+}
 
-export type ContainerClassKey = keyof ReturnType<typeof styles>
+export type ContainerClassKey = keyof typeof styles
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type ContainerClassesProps = {}
+// eslint-disable-next-line @typescript-eslint/ban-types
 export interface ContainerTypeMap<P = {}, D extends React.ElementType = 'div'> {
   props: P & {
     children: NonNullable<React.ReactNode>
@@ -98,16 +110,16 @@ export interface ContainerTypeMap<P = {}, D extends React.ElementType = 'div'> {
 }
 export type ContainerProps<
   D extends React.ElementType = ContainerTypeMap['defaultComponent'],
-  P = {}
-> = OverrideProps<ContainerTypeMap<P, D>, D>
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  P = {},
+  > = OverrideProps<ContainerTypeMap<P, D>, D>
 
-const Container = React.forwardRef<
+const Container = forwardRef<
   unknown,
-  ContainerProps & { component?: React.ElementType }
+  WithStyles<ContainerProps & { component?: React.ElementType }, typeof styles>
 >(function Container(props, ref) {
   const {
-    classes = {},
-    className,
+    classes,
     component: Component = 'div',
     disableGutters = false,
     fixed = false,
@@ -119,11 +131,9 @@ const Container = React.forwardRef<
     <Component
       className={clsx(
         classes.root,
-        maxWidth !== false &&
-          classes[`maxWidth${capitalize(maxWidth)}` as const],
+        maxWidth !== false && classes[`maxWidth${capitalize(maxWidth)}`],
         fixed && classes.fixed,
         disableGutters && classes.disableGutters,
-        className,
       )}
       ref={ref}
       {...other}
@@ -132,5 +142,5 @@ const Container = React.forwardRef<
 })
 
 export default withStyles(styles, { name: 'Container' })(
-  Container,
+  Container as any,
 ) as OverridableComponent<ContainerTypeMap>

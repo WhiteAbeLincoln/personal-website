@@ -1,3 +1,4 @@
+import { Properties as CSSProperties } from 'csstype'
 import {
   FolderCollection,
   FileCollectionEntry,
@@ -7,52 +8,54 @@ import {
 } from 'netlify-cms-app'
 import { AllPaths, MustInclude, UnionToIntersection } from '../util/types'
 import { GetObjectFieldType } from './utility-types'
-import { Properties as CSSProperties } from 'csstype'
 
-export const mdxCollection = { extension: 'mdx', format: 'yaml-frontmatter' } as const
+export const mdxCollection = {
+  extension: 'mdx',
+  format: 'yaml-frontmatter',
+} as const
 
 export const widgetSym = Symbol('aw-widgets')
 
 export const pattern = <T = never>(regex: string, message: string) =>
-  ([regex, message] as unknown) as readonly [string, string] & { __type: T }
+  [regex, message] as unknown as readonly [string, string] & { __type: T }
 export const options = <
-  Ts extends string[] | Array<{ label: string; value: unknown }>
+  Ts extends string[] | Array<{ label: string; value: unknown }>,
 >(
   ...opts: Ts
 ) => opts as Ts & { __type: Ts[number] }
-export const optionsSafe = <
-  T extends string | { label: string; value: unknown }
->() => <U extends [T, ...T[]]>(...opts: MustInclude<T, U>) =>
-  (opts as unknown) as T[] & { __type: T }
+export const optionsSafe =
+  <T extends string | { label: string; value: unknown }>() =>
+  <U extends [T, ...T[]]>(...opts: MustInclude<T, U>) =>
+    opts as unknown as T[] & { __type: T }
 
-export const relationField = <
-  T extends FolderCollection | FileCollectionEntry = never
->() => <
-  N extends string,
-  VPath extends AllPaths<V>,
-  SPaths extends [AllPaths<V>, ...AllPaths<V>[]],
-  V = GetObjectFieldType<T>
->(
-  name: N,
-  collection: T['name'],
-  valueField: VPath,
-  searchFields: SPaths,
-  rest?: Omit<
-    RelationWidgetField,
-    'name' | 'collection' | 'valueField' | 'searchFields' | 'widget'
-  >,
-) => {
-  const widget = {
-    widget: 'relation',
-    name,
-    collection,
-    valueField: valueField.join('.'),
-    searchFields: searchFields.map(s => s.join('.')) as [string, ...string[]],
-    ...rest,
-  } as const
+export const relationField =
+  <T extends FolderCollection | FileCollectionEntry = never>() =>
+  <
+    N extends string,
+    VPath extends AllPaths<V>,
+    SPaths extends [AllPaths<V>, ...AllPaths<V>[]],
+    V = GetObjectFieldType<T>,
+  >(
+    name: N,
+    collection: T['name'],
+    valueField: VPath,
+    searchFields: SPaths,
+    rest?: Omit<
+      RelationWidgetField,
+      'name' | 'collection' | 'valueField' | 'searchFields' | 'widget'
+    >,
+  ) => {
+    const widget = {
+      widget: 'relation',
+      name,
+      collection,
+      valueField: valueField.join('.'),
+      searchFields: searchFields.map(s => s.join('.')) as [string, ...string[]],
+      ...rest,
+    } as const
 
-  return widget as typeof widget & { __collectionType: V; __valuePath: VPath }
-}
+    return widget as typeof widget & { __collectionType: V; __valuePath: VPath }
+  }
 
 const splitUpper = (s: string) => s.split(/(?=[A-Z])/)
 const upperFirst = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
@@ -67,7 +70,7 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1)
  */
 export const cssProp = <
   N extends keyof CSSProperties<string | number>,
-  W extends Field['widget'] = 'string'
+  W extends Field['widget'] = 'string',
 >(
   name: N,
   label?: string,
@@ -159,7 +162,7 @@ export const positionFields = cssProps(
 export const typographyStyle = <
   N extends string,
   L extends string,
-  H extends string
+  H extends string,
 >(
   name: N,
   label?: L,
@@ -197,7 +200,7 @@ export const colors = <Ns extends string[]>(...names: Ns) =>
 export const paletteColor = <
   N extends string,
   L extends string,
-  H extends string
+  H extends string,
 >(
   name: N,
   label: L,
@@ -506,8 +509,7 @@ export const flexibleList = <N extends string>(name: N) =>
             label: 'Link',
             required: false,
             widget: 'string',
-            hint:
-              'Internal link (starting with /) or external link (starting with https://)',
+            hint: 'Internal link (starting with /) or external link (starting with https://)',
           },
         ],
         collapsed: true,
@@ -594,8 +596,7 @@ export const filteredLinkFields = [
       {
         name: 'groups',
         widget: 'list',
-        hint:
-          'Comma separated list of groups that the user must be in. Implies Logged In',
+        hint: 'Comma separated list of groups that the user must be in. Implies Logged In',
         required: false,
       },
     ],
@@ -606,7 +607,7 @@ export const filteredLinkFields = [
 export const basicPageNoT = <
   F extends string,
   L extends string,
-  N extends string
+  N extends string,
 >(
   file: F,
   label: L,
@@ -623,18 +624,16 @@ export const basicPageNoT = <
       seoField,
     ],
   } as const)
-export const basicPage = <T extends TemplateKey>(template: T) => <
-  F extends string,
-  L extends string,
-  N extends string
->(
-  file: F,
-  label: L,
-  name: N,
-) => {
-  const r = basicPageNoT(file, label, name)
-  return { ...r, fields: [templateKey(template), ...r.fields] } as const
-}
+export const basicPage =
+  <T extends TemplateKey>(template: T) =>
+  <F extends string, L extends string, N extends string>(
+    file: F,
+    label: L,
+    name: N,
+  ) => {
+    const r = basicPageNoT(file, label, name)
+    return { ...r, fields: [templateKey(template), ...r.fields] } as const
+  }
 
 export const simplePage = basicPage('simple')
 
@@ -799,7 +798,7 @@ export type WidgetMap = WidgetMapper<
 
 export const styledStr = <
   N extends string,
-  W extends 'text' | 'string' = 'string'
+  W extends 'text' | 'string' = 'string',
 >(
   name: N,
   widget = 'string' as W,
@@ -830,7 +829,7 @@ export const styledLabelValue = <N extends string, L extends string>(
       { ...typog('value_styles'), label: 'Value Styles' },
     ],
   } as const
-  if (label) (base as any).label = label
+  if (label) (base as typeof base & { label: L }).label = label
   return base as typeof base & { readonly label?: L }
 }
 export type StyledLabelValue = GetObjectFieldType<

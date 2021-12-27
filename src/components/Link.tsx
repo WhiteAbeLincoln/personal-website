@@ -1,69 +1,61 @@
-/*
- * Taken from material-ui
- * @see MUI_LICENSE
- */
-import React from 'react'
-import Typography, { TypographyProps } from '@comps/typography'
-import { createStyles } from '@material-ui/styles'
-import { forwardRef } from 'react'
-import { capitalize, clsx } from '@util/util'
+import { css } from '@linaria/core'
+import React, { forwardRef, useState } from 'react'
+import Typography, { TypographyProps } from '@src/components/typography'
+import { clsx, WithStyles, withStyles } from '@src/styles'
+import { capitalize } from '@src/util'
+import useForkRef from '@src/util/hooks/useForkRef'
+import useIsFocusVisible from '@src/util/hooks/useIsFocusVisible'
 import {
   OverridableComponent,
   OverrideProps,
-} from '@util/types/OverridableComponent'
-import useForkRef from '@util/hooks/useForkRef'
-import useIsFocusVisible from '@util/hooks/useIsFocusVisible'
+} from '@src/util/types/OverridableComponent'
 
-export const styles = createStyles({
-  /* Styles applied to the root element. */
-  root: {
-    '&:visited': {
-      color: '#774755',
-    },
-  },
+const styles = {
+  root: css`
+    &:visited {
+      color: #774755;
+    }
+  `,
   /* Styles applied to the root element if `underline="none"`. */
-  underlineNone: {
-    textDecoration: 'none',
-  },
+  underlineNone: css`
+    text-decoration: none;
+  `,
   /* Styles applied to the root element if `underline="hover"`. */
-  underlineHover: {
-    textDecoration: 'none',
-    '&:hover': {
-      textDecoration: 'underline',
-    },
-  },
+  underlineHover: css`
+    text-decoration: none;
+    &:hover,
+    &:focus {
+      text-decoration: underline;
+    }
+  `,
   /* Styles applied to the root element if `underline="always"`. */
-  underlineAlways: {
-    textDecoration: 'underline',
-  },
-  button: {
-    position: 'relative',
-    WebkitTapHighlightColor: 'transparent',
-    backgroundColor: 'transparent', // Reset default value
-    // We disable the focus ring for mouse, touch and keyboard users.
-    outline: 0,
-    border: 0,
-    margin: 0, // Remove the margin in Safari
-    borderRadius: 0,
-    padding: 0, // Remove the padding in Firefox
-    cursor: 'pointer',
-    userSelect: 'none',
-    verticalAlign: 'middle',
-    '-moz-appearance': 'none', // Reset
-    '-webkit-appearance': 'none', // Reset
-    '&::-moz-focus-inner': {
-      borderStyle: 'none', // Remove Firefox dotted outline.
-    },
-    '&$focusVisible': {
-      outline: 'auto',
-    },
-  },
+  underlineAlways: css`
+    text-decoration: underline;
+  `,
+  button: css`
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    background-color: transparent;
+    outline: 0;
+    border: 0;
+    margin: 0;
+    border-radius: 0;
+    padding: 0;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+    appearance: none;
+    &::-moz-focus-inner {
+      border-style: none;
+    }
+  `,
   /* Pseudo-class applied to the root element if the link is keyboard focused. */
-  focusVisible: {},
-})
+  focusVisible: '',
+}
 
 type LinkClassKey = keyof typeof styles
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export interface LinkTypeMap<P = {}, D extends React.ElementType = 'a'> {
   props: P &
     LinkBaseProps & {
@@ -79,70 +71,76 @@ export type LinkBaseProps = React.AnchorHTMLAttributes<HTMLAnchorElement> &
 
 export type LinkProps<
   D extends React.ElementType = LinkTypeMap['defaultComponent'],
-  P = {}
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  P = {},
 > = OverrideProps<LinkTypeMap<P, D>, D>
 
 type Props = LinkProps & { component?: React.ElementType }
 
-const Link = forwardRef<unknown, Props>(function Link(
-  {
-    classes = {},
-    className,
-    color = 'secondary',
-    component = 'a',
-    onBlur,
-    onFocus,
-    TypographyClasses,
-    underline = 'always',
-    variant = 'inherit',
-    ...other
+const Link = forwardRef<unknown, WithStyles<Props, typeof styles>>(
+  function Link(
+    {
+      classes,
+      color = 'secondary',
+      component = 'a',
+      onBlur,
+      onFocus,
+      TypographyClasses,
+      underline = 'always',
+      variant = 'inherit',
+      ...other
+    },
+    ref,
+  ) {
+    const {
+      isFocusVisibleRef,
+      onBlur: handleBlurVisible,
+      onFocus: handleFocusVisible,
+      ref: focusVisibleRef,
+    } = useIsFocusVisible()
+    const [focusVisible, setFocusVisible] = useState(false)
+    const handlerRef = useForkRef(ref, focusVisibleRef)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleBlur = (event: React.FocusEvent<any>) => {
+      handleBlurVisible(event)
+      if (isFocusVisibleRef.current === false) {
+        setFocusVisible(false)
+      }
+      if (onBlur) {
+        onBlur(event)
+      }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleFocus = (event: React.FocusEvent<any>) => {
+      handleFocusVisible(event)
+      if (isFocusVisibleRef.current === true) {
+        setFocusVisible(true)
+      }
+      if (onFocus) {
+        onFocus(event)
+      }
+    }
+
+    return (
+      <Typography
+        className={clsx(
+          classes.root,
+          component === 'button' && classes.button,
+          classes[`underline${capitalize(underline)}`],
+        )}
+        classes={TypographyClasses}
+        color={color}
+        component={component}
+        onBlur={handleBlur}
+        onFocus={handleFocus}
+        ref={handlerRef}
+        variant={variant}
+        {...other}
+      />
+    )
   },
-  ref,
-) {
-  const {
-    isFocusVisible,
-    onBlurVisible,
-    ref: focusVisibleRef,
-  } = useIsFocusVisible()
-  const [focusVisible, setFocusVisible] = React.useState(false)
-  const handlerRef = useForkRef(ref, focusVisibleRef)
-  const handleBlur: React.FocusEventHandler<HTMLAnchorElement> = event => {
-    if (focusVisible) {
-      onBlurVisible()
-      setFocusVisible(false)
-    }
-    if (onBlur) {
-      onBlur(event)
-    }
-  }
-  const handleFocus: React.FocusEventHandler<HTMLAnchorElement> = event => {
-    if (isFocusVisible(event)) {
-      setFocusVisible(true)
-    }
-    if (onFocus) {
-      onFocus(event)
-    }
-  }
+)
 
-  return (
-    <Typography
-      className={clsx(
-        classes.root,
-        component === 'button' && classes.button,
-        focusVisible && classes.focusVisible,
-        classes[`underline${capitalize(underline)}` as const],
-        className,
-      )}
-      classes={TypographyClasses}
-      color={color}
-      component={component}
-      onBlur={handleBlur}
-      onFocus={handleFocus}
-      ref={handlerRef}
-      variant={variant}
-      {...other}
-    />
-  )
-})
-
-export default Link as OverridableComponent<LinkTypeMap>
+export default withStyles(styles, { name: 'Link' })(
+  Link as any,
+) as OverridableComponent<LinkTypeMap>

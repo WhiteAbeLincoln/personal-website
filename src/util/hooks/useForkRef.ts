@@ -2,7 +2,7 @@
 taken from material-ui
 @see MUI_LICENSE
 */
-import React from 'react'
+import React, { useMemo } from 'react'
 
 function setRef<T>(ref: React.Ref<T> | undefined, value: T | null) {
   if (typeof ref === 'function') {
@@ -23,7 +23,7 @@ export default function useForkRef<T>(
    * This means react will call the old forkRef with `null` and the new forkRef
    * with the ref. Cleanup naturally emerges from this behavior
    */
-  return React.useMemo(() => {
+  return useMemo(() => {
     if (refA == null && refB == null) {
       return null
     }

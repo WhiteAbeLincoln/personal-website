@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * converts a tuple of unions to a union of tuples
  *
@@ -50,7 +51,7 @@ export type Reverse<Tuple extends any[], Prefix extends any[] = []> = {
 export type IsFinite<
   Tuple extends readonly any[],
   Finite = '1',
-  Infinite = '0'
+  Infinite = '0',
 > = {
   empty: Finite
   nonEmpty: ((..._: Tuple) => any) extends (

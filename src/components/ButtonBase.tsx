@@ -1,86 +1,106 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /*
-taken from material-ui
+adapted from material-ui https://github.com/mui-org/material-ui/blob/1b9c44b82183d804c38b80dcad1fd9265d0761c8/packages/mui-material/src/ButtonBase/ButtonBase.js
 @see MUI_LICENSE
 */
-import React, { PropsWithChildren, ReactInstance } from 'react'
-import { createStyles, withStyles } from '@material-ui/styles'
+import { css } from '@linaria/core'
+import React, {
+  FocusEvent,
+  KeyboardEvent,
+  MouseEvent,
+  useImperativeHandle,
+  useRef,
+  useState,
+  forwardRef,
+} from 'react'
+import { clsx, withStyles, WithStyles } from '@src/styles'
+import useEventCallback from '@src/util/hooks/useEventCallback'
+import useForkRef from '@src/util/hooks/useForkRef'
+import useIsFocusVisible from '@src/util/hooks/useIsFocusVisible'
 import {
   OverridableComponent,
   OverridableTypeMap,
   OverrideProps,
-} from '@util/types/OverridableComponent'
-import { clsx } from '@util/util'
-import useIsFocusVisible from '@util/hooks/useIsFocusVisible'
-import useEventCallback from '@util/hooks/useEventCallback'
-import ReactDOM from 'react-dom'
-import useForkRef from '@util/hooks/useForkRef'
+} from '@src/util/types/OverridableComponent'
 
-export const styles = createStyles({
+const styles = {
   /* Styles applied to the root element. */
-  root: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    WebkitTapHighlightColor: 'transparent',
-    backgroundColor: 'transparent', // Reset default value
-    // We disable the focus ring for mouse, touch and keyboard users.
-    outline: 0,
-    border: 0,
-    margin: 0, // Remove the margin in Safari
-    borderRadius: 0,
-    padding: 0, // Remove the padding in Firefox
-    cursor: 'pointer',
-    userSelect: 'none',
-    verticalAlign: 'middle',
-    '-moz-appearance': 'none', // Reset
-    '-webkit-appearance': 'none', // Reset
-    textDecoration: 'none',
-    // So we take precedent over the style of a native <a /> element.
-    color: 'inherit',
-    '&::-moz-focus-inner': {
-      borderStyle: 'none', // Remove Firefox dotted outline.
-    },
-    '&$disabled': {
-      pointerEvents: 'none', // Disable link interactions
-      cursor: 'default',
-    },
-    '@media print': {
-      colorAdjust: 'exact',
-    },
-  },
+  root: css`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    background-color: transparent;
+    outline: 0;
+    border: 0;
+    margin: 0;
+    border-radius: 0;
+    padding: 0;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+    appearance: none;
+    text-decoration: none;
+    color: inherit;
+    &::-moz-focus-inner {
+      border-style: none;
+    }
+    @media print {
+      color-adjust: exact;
+    }
+  `,
   /* Pseudo-class applied to the root element if `disabled={true}`. */
-  disabled: {},
+  disabled: css`
+    pointer-events: none;
+    cursor: default;
+  `,
   /* Pseudo-class applied to the root element if keyboard focused. */
-  focusVisible: {},
-})
+  focusVisible: '',
+}
 
-export type ButtonBaseClassKey = keyof typeof styles
+type ButtonBaseClassKey = keyof typeof styles
+
+export interface ButtonBaseActions {
+  focusVisible(): void
+}
+
 export interface ButtonBaseTypeMap<
   // eslint-disable-next-line @typescript-eslint/ban-types
   P = {},
-  D extends React.ElementType = 'button'
+  D extends React.ElementType = 'button',
 > {
-  props: P &
-    PropsWithChildren<{
-      disabled?: boolean
-      /**
-       * This prop can help a person know which element has the keyboard focus.
-       * The class name will be applied when the element gain the focus through a keyboard interaction.
-       * It's a polyfill for the [CSS :focus-visible selector](https://drafts.csswg.org/selectors-4/#the-focus-visible-pseudo).
-       * The rationale for using this feature [is explained here](https://github.com/WICG/focus-visible/blob/master/explainer.md).
-       * A [polyfill can be used](https://github.com/WICG/focus-visible) to apply a `focus-visible` class to other components
-       * if needed.
-       */
-      focusVisibleClassName?: string
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onFocusVisible?: React.FocusEventHandler<any>
-      onClick?: React.EventHandler<
-        React.MouseEvent<any> | React.KeyboardEvent<any>
-      >
-      tabIndex?: string | number
-    }>
+  props: P & {
+    /**
+     * A ref for imperative actions.
+     * It currently only supports `focusVisible()` action.
+     */
+    action?: React.Ref<ButtonBaseActions>
+    /**
+     * The content of the component.
+     */
+    children?: React.ReactNode
+    /**
+     * If `true`, the component is disabled.
+     * @default false
+     */
+    disabled?: boolean
+    /**
+     * The component used to render a link when the `href` prop is provided.
+     * @default 'a'
+     */
+    LinkComponent?: React.ElementType
+    /**
+     * Callback fired when the component is focused with a keyboard.
+     * We trigger a `onFocus` callback too.
+     */
+    onFocusVisible?: React.FocusEventHandler<any>
+    /**
+     * @default 0
+     */
+    tabIndex?: NonNullable<React.HTMLAttributes<any>['tabIndex']>
+  }
   defaultComponent: D
   classKey: ButtonBaseClassKey
 }
@@ -104,7 +124,7 @@ export type ExtendButtonBase<M extends OverridableTypeMap> = ((
 export type ButtonBaseProps<
   D extends React.ElementType = ButtonBaseTypeMap['defaultComponent'],
   // eslint-disable-next-line @typescript-eslint/ban-types
-  P = {}
+  P = {},
 > = OverrideProps<ButtonBaseTypeMap<P, D>, D>
 
 type Props = Parameters<ExtendButtonBase<ButtonBaseTypeMap>>[0] & {
@@ -112,181 +132,190 @@ type Props = Parameters<ExtendButtonBase<ButtonBaseTypeMap>>[0] & {
   href?: string
 }
 
-const ButtonBase = React.forwardRef<unknown, Props>(function ButtonBase(
-  {
-    component = 'button',
-    tabIndex = 0,
-    disabled = false,
-    type = 'button',
-    classes = {},
-    onFocus,
-    onFocusVisible,
-    onBlur,
-    onKeyDown,
-    onKeyUp,
-    onClick,
-    focusVisibleClassName,
-    className,
-    ...other
-  },
-  ref,
-) {
-  const buttonRef = React.useRef<ReactInstance | null>(null)
-  function getButtonNode() {
-    // #StrictMode ready
-    return ReactDOM.findDOMNode(buttonRef.current)
-  }
-  const [focusVisible, setFocusVisible] = React.useState(false)
-  if (disabled && focusVisible) {
-    setFocusVisible(false)
-  }
-  const {
-    isFocusVisible,
-    onBlurVisible,
-    ref: focusVisibleRef,
-  } = useIsFocusVisible()
+const ButtonBase = forwardRef<unknown, WithStyles<Props, typeof styles>>(
+  function ButtonBase(props, ref) {
+    const {
+      action,
+      component = 'button',
+      tabIndex = 0,
+      disabled = false,
+      type,
+      onFocus,
+      onFocusVisible,
+      onBlur,
+      onKeyDown,
+      onKeyUp,
+      onClick,
+      children,
+      LinkComponent = 'a',
+      classes,
+      ...other
+    } = props
+    const buttonRef = useRef<HTMLElement | null>(null)
 
-  const handleFocus = useEventCallback((event: React.FocusEvent<any>) => {
-    // Fix for https://github.com/facebook/react/issues/7769
-    if (!buttonRef.current) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      buttonRef.current = event.currentTarget
-    }
-
-    if (isFocusVisible(event)) {
-      setFocusVisible(true)
-
-      if (onFocusVisible) {
-        onFocusVisible(event)
-      }
-    }
-
-    if (onFocus) {
-      onFocus(event)
-    }
-  })
-
-  const handleBlur = useEventCallback((event: React.FocusEvent<any>) => {
-    if (focusVisible) {
-      onBlurVisible()
+    const {
+      isFocusVisibleRef,
+      onFocus: handleFocusVisible,
+      onBlur: handleBlurVisible,
+      ref: focusVisibleRef,
+    } = useIsFocusVisible()
+    const [focusVisible, setFocusVisible] = useState(false)
+    if (disabled && focusVisible) {
       setFocusVisible(false)
     }
-    if (onBlur) {
-      onBlur(event)
-    }
-  })
 
-  const isNonNativeButton = () => {
-    const button = getButtonNode()
-    return (
-      component &&
-      component !== 'button' &&
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      !((button as any)?.tagName === 'A' && (button as any)?.href)
+    useImperativeHandle(
+      action,
+      () => ({
+        focusVisible: () => {
+          setFocusVisible(true)
+          buttonRef.current?.focus()
+        },
+      }),
+      [],
     )
-  }
 
-  /**
-   * IE 11 shim for https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat
-   */
-  const keydownRef = React.useRef(false)
-  const handleKeyDown = useEventCallback((event: React.KeyboardEvent<any>) => {
-    // Check if key is already down to avoid repeats being counted as multiple activations
-    if (!keydownRef.current && focusVisible && event.key === ' ') {
-      keydownRef.current = true
-      event.persist()
-    }
-
-    if (
-      event.target === event.currentTarget &&
-      isNonNativeButton() &&
-      event.key === ' '
-    ) {
-      event.preventDefault()
-    }
-
-    if (onKeyDown) {
-      onKeyDown(event)
-    }
-
-    // Keyboard accessibility for non interactive elements
-    if (
-      event.target === event.currentTarget &&
-      isNonNativeButton() &&
-      event.key === 'Enter' &&
-      !disabled
-    ) {
-      event.preventDefault()
-      if (onClick) {
-        onClick(event)
+    const handleBlur = (event: React.FocusEvent<any>) => {
+      handleBlurVisible(event)
+      if (isFocusVisibleRef.current === false) {
+        setFocusVisible(false)
+      }
+      if (onBlur) {
+        onBlur(event)
       }
     }
-  })
 
-  const handleKeyUp = useEventCallback((event: React.KeyboardEvent<any>) => {
-    // calling preventDefault in keyUp on a <button> will not dispatch a click event if Space is pressed
-    // https://codesandbox.io/s/button-keyup-preventdefault-dn7f0
-    if (event.key === ' ' && focusVisible && !event.defaultPrevented) {
-      keydownRef.current = false
-      event.persist()
-    }
-    if (onKeyUp) {
-      onKeyUp(event)
+    const handleFocus = useEventCallback((event: FocusEvent<HTMLElement>) => {
+      // Fix for https://github.com/facebook/react/issues/7769
+      if (!buttonRef.current) {
+        buttonRef.current = event.currentTarget
+      }
+
+      handleFocusVisible(event)
+      if (isFocusVisibleRef.current === true) {
+        setFocusVisible(true)
+
+        if (onFocusVisible) {
+          onFocusVisible(event)
+        }
+      }
+
+      if (onFocus) {
+        onFocus(event as FocusEvent<HTMLButtonElement>)
+      }
+    })
+
+    const isNonNativeButton = () => {
+      const button = buttonRef.current
+      return (
+        component &&
+        component !== 'button' &&
+        !(
+          button?.tagName === 'A' &&
+          (button as typeof button & { href?: string })?.href
+        )
+      )
     }
 
-    // Keyboard accessibility for non interactive elements
+    const handleKeyDown = useEventCallback(
+      (event: KeyboardEvent<HTMLElement>) => {
+        if (
+          event.target === event.currentTarget &&
+          isNonNativeButton() &&
+          event.key === ' '
+        ) {
+          event.preventDefault()
+        }
+
+        if (onKeyDown) {
+          onKeyDown(event as KeyboardEvent<HTMLButtonElement>)
+        }
+
+        // Keyboard accessibility for non interactive elements
+        if (
+          event.target === event.currentTarget &&
+          isNonNativeButton() &&
+          event.key === 'Enter' &&
+          !disabled
+        ) {
+          event.preventDefault()
+          if (onClick) {
+            onClick(event as unknown as MouseEvent<HTMLButtonElement>)
+          }
+        }
+      },
+    )
+
+    const handleKeyUp = useEventCallback(
+      (event: KeyboardEvent<HTMLButtonElement>) => {
+        // calling preventDefault in keyUp on a <button> will not dispatch a click event if Space is pressed
+        // https://codesandbox.io/s/button-keyup-preventdefault-dn7f0
+        if (onKeyUp) {
+          onKeyUp(event)
+        }
+
+        // Keyboard accessibility for non interactive elements
+        if (
+          onClick &&
+          event.target === event.currentTarget &&
+          isNonNativeButton() &&
+          event.key === ' ' &&
+          !event.defaultPrevented
+        ) {
+          onClick(event as unknown as MouseEvent<HTMLButtonElement>)
+        }
+      },
+    )
+
+    let ComponentProp = component
+
     if (
-      onClick &&
-      event.target === event.currentTarget &&
-      isNonNativeButton() &&
-      event.key === ' ' &&
-      !event.defaultPrevented
+      ComponentProp === 'button' &&
+      (other.href || (other as typeof other & { to?: string }).to)
     ) {
-      onClick(event)
+      ComponentProp = LinkComponent
     }
-  })
 
-  let ComponentProp = component
-
-  if (ComponentProp === 'button' && other.href) {
-    ComponentProp = 'a'
-  }
-
-  const buttonProps: JSX.IntrinsicElements['button'] = {}
-  if (ComponentProp === 'button') {
-    buttonProps.type = type
-    buttonProps.disabled = disabled
-  } else {
-    if (ComponentProp !== 'a' || !other.href) {
-      buttonProps.role = 'button'
+    const buttonProps: JSX.IntrinsicElements['button'] = {}
+    if (ComponentProp === 'button') {
+      buttonProps.type = type === undefined ? 'button' : type
+      buttonProps.disabled = disabled
+    } else {
+      if (!other.href && !(other as typeof other & { to?: string }).to) {
+        buttonProps.role = 'button'
+      }
+      if (disabled) {
+        buttonProps['aria-disabled'] = disabled
+      }
     }
-    buttonProps['aria-disabled'] = disabled
-  }
 
-  const handleOwnRef = useForkRef(focusVisibleRef, buttonRef)
-  const handleRef = useForkRef(ref, handleOwnRef)
+    const handleOwnRef = useForkRef(focusVisibleRef, buttonRef)
+    const handleRef = useForkRef(ref, handleOwnRef)
 
-  return (
-    <ComponentProp
-      ref={handleRef}
-      className={clsx(
-        classes.root,
-        disabled && classes.disabled,
-        focusVisible && classes.focusVisible,
-        focusVisible && focusVisibleClassName,
-        className,
-      )}
-      onBlur={handleBlur}
-      onFocus={handleFocus}
-      onKeyDown={handleKeyDown}
-      onKeyUp={handleKeyUp}
-      tabIndex={disabled ? -1 : tabIndex}
-      {...buttonProps}
-      {...other}
-    />
-  )
-})
+    return (
+      <ComponentProp
+        className={clsx(
+          classes.root,
+          disabled && classes.disabled,
+          focusVisible && classes.focusVisible,
+        )}
+        onBlur={handleBlur}
+        onClick={onClick}
+        onFocus={handleFocus}
+        onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
+        ref={handleRef}
+        tabIndex={disabled ? -1 : tabIndex}
+        type={type}
+        {...buttonProps}
+        {...other}
+      >
+        {children}
+      </ComponentProp>
+    )
+  },
+)
 
 export default withStyles(styles, { name: 'ButtonBase' })(
-  ButtonBase,
+  ButtonBase as any,
 ) as ExtendButtonBase<ButtonBaseTypeMap>

@@ -1,6 +1,6 @@
+import { graphql } from 'gatsby'
 import React from 'react'
 import Helmet from 'react-helmet'
-import { graphql } from 'gatsby'
 import { Seo } from '../graphql.gen'
 
 export type SeoOptions = { title?: string; seo?: Seo }
@@ -30,7 +30,7 @@ const metaAuthor = (content: string) => [
   { name: 'twitter:creator', content },
 ]
 
-export const SEO = (props: SeoOptions) => {
+const SEO = (props: SeoOptions) => {
   const seo = props.seo
   const description = seo?.description ?? ''
   const lang = seo?.lang ?? 'en'

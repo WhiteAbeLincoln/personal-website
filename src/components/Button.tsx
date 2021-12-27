@@ -3,143 +3,115 @@
 taken from material-ui
 @see MUI_LICENSE
 */
-import React from 'react'
-import { Theme, spacing, shadowBorder } from '../styles/theme'
-import { createStyles, withStyles } from '@material-ui/styles'
+import { css } from '@linaria/core'
+import React, { forwardRef } from 'react'
 import ButtonBase, {
   ExtendButtonBase,
   ExtendButtonBaseTypeMap,
 } from './ButtonBase'
-import { OverrideProps } from '@util/types/OverridableComponent'
-import { capitalize, clsx } from '@util/util'
+import {
+  clsx,
+  getVar,
+  shadowBorder,
+  typography,
+  WithStyles,
+  withStyles,
+  spacing,
+} from '@src/styles'
+import { capitalize } from '@src/util'
+import { OverrideProps } from '@src/util/types/OverridableComponent'
 
-export const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      ...theme.typography.button,
-      minWidth: '4rem',
-      color: theme.palette.text.primary,
-      textDecoration: 'none',
-      '&:hover': {
-        textDecoration: 'none',
-      },
-      ...shadowBorder(theme),
-      '&$disabled': {
-        color: theme.palette.text.disabled,
-        ...shadowBorder(theme, { disabled: true }),
-      },
-      padding: spacing(theme)(1, 2),
-      '&:hover, &:focus': {
-        ...shadowBorder(theme, { focused: true }),
-      },
-    },
-    colorPrimary: {
-      color: theme.palette.primary.main,
-      ...shadowBorder(theme, { color: theme.palette.primary.main }),
-      '&:hover, &:focus': {
-        ...shadowBorder(theme, { focused: true, color: theme.palette.primary.main }),
-      },
-    },
-    colorSecondary: {
-      color: theme.palette.secondary.main,
-      ...shadowBorder(theme, { color: theme.palette.secondary.main }),
-      '&:hover, &:focus': {
-        ...shadowBorder(theme, { focused: true, color: theme.palette.secondary.main }),
-      },
-    },
-    colorWarning: {
-      color: theme.palette.warning.main,
-      ...shadowBorder(theme, { color: theme.palette.warning.main }),
-      '&:hover, &:focus': {
-        ...shadowBorder(theme, { focused: true, color: theme.palette.warning.main }),
-      },
-    },
-    colorError: {
-      color: theme.palette.error.main,
-      ...shadowBorder(theme, { color: theme.palette.error.main }),
-      '&:hover, &:focus': {
-        ...shadowBorder(theme, { focused: true, color: theme.palette.error.main }),
-      },
-    },
-    colorSuccess: {
-      color: theme.palette.success.main,
-      ...shadowBorder(theme, { color: theme.palette.success.main }),
-      '&:hover, &:focus': {
-        ...shadowBorder(theme, { focused: true, color: theme.palette.success.main }),
-      },
-    },
-    colorInfo: {
-      color: theme.palette.info.main,
-      ...shadowBorder(theme, { color: theme.palette.info.main }),
-      '&:hover, &:focus': {
-        ...shadowBorder(theme, { focused: true, color: theme.palette.info.main }),
-      },
-    },
-    label: {
-      width: '100%', // Ensure the correct width for iOS Safari
-      display: 'inherit',
-      alignItems: 'inherit',
-      justifyContent: 'inherit',
-    },
-    disabled: {},
-    focusVisible: {},
-    sizeSmall: {
-      padding: spacing(theme)(1),
-    },
-    sizeLarge: {
-      padding: spacing(theme)(2, 3),
-    },
-    fullWidth: {
-      width: '100%',
-    },
-    /* Styles applied to the startIcon element if supplied. */
-    startIcon: {
-      display: 'inherit',
-      marginRight: 8,
-      marginLeft: -4,
-      '&$iconSizeSmall': {
-        marginLeft: -2,
-      },
-    },
-    /* Styles applied to the endIcon element if supplied. */
-    endIcon: {
-      display: 'inherit',
-      marginRight: -4,
-      marginLeft: 8,
-      '&$iconSizeSmall': {
-        marginRight: -2,
-      },
-    },
-    /* Styles applied to the icon element if supplied and `size="small"`. */
-    iconSizeSmall: {
-      '& > *:first-child': {
-        fontSize: 18,
-      },
-    },
-    /* Styles applied to the icon element if supplied and `size="medium"`. */
-    iconSizeMedium: {
-      '& > *:first-child': {
-        fontSize: 20,
-      },
-    },
-    /* Styles applied to the icon element if supplied and `size="large"`. */
-    iconSizeLarge: {
-      '& > *:first-child': {
-        fontSize: 22,
-      },
-    },
-    /* Styles applied to the root element if `color="inherit"`. */
-    colorInherit: {
-      color: 'inherit',
-      borderColor: 'currentColor',
-    },
-  })
+const styles = {
+  root: css`
+    ${typography('button')}
 
-export type ButtonClassKey = keyof ReturnType<typeof styles>
+    min-width: 4rem;
+    color: var(--theme-palette-text-primary);
+    text-decoration: none;
+    &:hover {
+      text-decoration: none;
+    }
+    ${shadowBorder.base};
+    padding: ${spacing(1, 2)};
+    &:hover,
+    &:focus {
+      ${shadowBorder.focused};
+    }
+  `,
+  colorPrimary: css`
+    color: var(--theme-palette-primary-main);
+  `,
+  colorSecondary: css`
+    color: var(--theme-palette-secondary-main);
+  `,
+  colorWarning: css`
+    color: var(--theme-palette-warning-main);
+  `,
+  colorError: css`
+    color: var(--theme-palette-error-main);
+  `,
+  colorSuccess: css`
+    color: var(--theme-palette-success-main);
+  `,
+  colorInfo: css`
+    color: var(--theme-palette-info-main);
+  `,
+  label: css`
+    width: 100%;
+    display: inherit;
+    align-items: inherit;
+    justify-content: inherit;
+  `,
+  disabled: css`
+    color: ${getVar('palette-text-disabled')};
+  `,
+  focusVisible: '',
+  sizeSmall: css`
+    padding: ${spacing(1)};
+  `,
+  sizeLarge: css`
+    padding: ${spacing(2, 3)};
+  `,
+  fullWidth: css`
+    width: 100%;
+  `,
+  startIcon: css`
+    display: inherit;
+    margin-right: 8;
+    margin-left: -4;
+  `,
+  endIcon: css`
+    display: inherit;
+    margin-right: -4;
+    margin-left: 8;
+  `,
+  iconSizeSmall: css`
+    margin-left: -2;
+    & > *:first-child {
+      font-size: 18px;
+    }
+  `,
+  iconSizeMedium: css`
+    & > *:first-child {
+      font-size: 20px;
+    }
+  `,
+  iconSizeLarge: css`
+    & > *:first-child {
+      font-size: 22px;
+    }
+  `,
+  colorInherit: css`
+    color: inherit;
+    border-color: currentColor;
+  `,
+}
+
+export type ButtonClassKey = keyof typeof styles
 
 export type ButtonTypeMap<
   P = {},
-  D extends React.ElementType = 'button'
+  D extends React.ElementType = 'button',
 > = ExtendButtonBaseTypeMap<{
   props: P & {
     /**
@@ -191,7 +163,7 @@ export type ButtonTypeMap<
 
 export type ButtonProps<
   D extends React.ElementType = ButtonTypeMap['defaultComponent'],
-  P = {}
+  P = {},
 > = OverrideProps<ButtonTypeMap<P, D>, D>
 
 type Props = ButtonProps & {
@@ -199,77 +171,75 @@ type Props = ButtonProps & {
   href?: string
 }
 
-const Button = React.forwardRef<unknown, Props>(function Button(
-  {
-    children,
-    classes = {},
-    className,
-    color = 'default',
-    component = 'button',
-    disabled = false,
-    endIcon: endIconProp,
-    focusVisibleClassName,
-    fullWidth = false,
-    size = 'medium',
-    startIcon: startIconProp,
-    type = 'button',
-    ...other
-  },
-  ref,
-) {
-  const startIcon = startIconProp && (
-    <span
-      className={clsx(
-        classes.startIcon,
-        classes[`iconSize${capitalize(size)}` as const],
-      )}
-    >
-      {startIconProp}
-    </span>
-  )
+const Button = forwardRef<unknown, WithStyles<Props, typeof styles>>(
+  function Button(props, ref) {
+    const {
+      children,
+      classes,
+      color = 'default',
+      component = 'button',
+      disabled = false,
+      endIcon: endIconProp,
+      fullWidth = false,
+      size = 'medium',
+      startIcon: startIconProp,
+      type = 'button',
+      ...other
+    } = props
 
-  const endIcon = endIconProp && (
-    <span
-      className={clsx(
-        classes.endIcon,
-        classes[`iconSize${capitalize(size)}` as const],
-      )}
-    >
-      {endIconProp}
-    </span>
-  )
-
-  return (
-    <ButtonBase
-      className={clsx(
-        classes.root,
-        size !== 'medium' && classes[`size${capitalize(size)}` as const],
-        disabled && classes.disabled,
-        fullWidth && classes.fullWidth,
-        color !== 'default' && classes[`color${capitalize(color)}` as const],
-        className,
-      )}
-      component={component}
-      disabled={disabled}
-      focusVisibleClassName={clsx(classes.focusVisible, focusVisibleClassName)}
-      ref={ref}
-      type={type}
-      {...other}
-    >
-      {/*
-       * The inner <span> is required to vertically align the children.
-       * Browsers don't support `display: flex` on a <button> element.
-       * https://github.com/philipwalton/flexbugs/blob/master/README.md#flexbug-9
-       */}
-      <span className={classes.label}>
-        {startIcon}
-        {children}
-        {endIcon}
+    const startIcon = startIconProp && (
+      <span
+        className={clsx(
+          classes.startIcon,
+          classes[`iconSize${capitalize(size)}`],
+        )}
+      >
+        {startIconProp}
       </span>
-    </ButtonBase>
-  )
-})
+    )
+
+    const endIcon = endIconProp && (
+      <span
+        className={clsx(
+          classes.endIcon,
+          classes[`iconSize${capitalize(size)}`],
+        )}
+      >
+        {endIconProp}
+      </span>
+    )
+
+    return (
+      <ButtonBase
+        className={clsx(
+          classes.root,
+          size !== 'medium' && classes[`size${capitalize(size)}`],
+          disabled && classes.disabled,
+          fullWidth && classes.fullWidth,
+          color !== 'default' && classes[`color${capitalize(color)}`],
+        )}
+        classes={{ focusVisible: classes.focusVisible }}
+        component={component}
+        disabled={disabled}
+        ref={ref}
+        type={type}
+        {...other}
+      >
+        {/*
+         * The inner <span> is required to vertically align the children.
+         * Browsers don't support `display: flex` on a <button> element.
+         * https://github.com/philipwalton/flexbugs/blob/master/README.md#flexbug-9
+         */}
+        <span className={classes.label}>
+          {startIcon}
+          {children}
+          {endIcon}
+        </span>
+      </ButtonBase>
+    )
+  },
+)
 
 export default withStyles(styles, { name: 'Button' })(
-  Button,
+  Button as any,
 ) as ExtendButtonBase<ButtonTypeMap>

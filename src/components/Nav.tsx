@@ -1,10 +1,6 @@
 import React from 'react'
-import ButtonLink, { ButtonLinkProps } from '@comps/ButtonLink'
-import { makeStyles } from '@material-ui/styles'
-import { bp_lt, spacing } from '@styles/theme'
-import { ClassesProp } from '@util/types'
-import { clsx } from '@util/util'
 import { GetProps } from './LinkWrapper'
+import ButtonLink, { ButtonLinkProps } from '@src/components/ButtonLink'
 
 type LinkDef = { readonly name: string; readonly to: string }
 type Links = readonly LinkDef[]
@@ -17,31 +13,9 @@ export const defaultLinks: Links = [
   { name: 'Contact', to: '/contact' },
 ]
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    marginBottom: `-${spacing(theme)(1)}`,
-    [bp_lt('xs')(theme)]: {
-      marginLeft: `-${spacing(theme)(2)}`,
-    },
-  },
-  link: {
-    '& + &': {
-      marginLeft: spacing(theme)(1),
-    },
-    marginBottom: spacing(theme)(1),
-    [bp_lt('xs')(theme)]: {
-      // fixes indented button when nav wraps
-      '&:first-of-type': {
-        marginLeft: spacing(theme)(1),
-      },
-    },
-  },
-}))
-
 export const Nav = ({
   links = defaultLinks,
   linkProps,
-  className,
   getProps,
   ...props
 }: {
@@ -55,35 +29,32 @@ export const Nav = ({
         oldProps: ReturnType<GetProps>,
       ) => ReturnType<GetProps>)
     | ReturnType<GetProps>
-} & ClassesProp<typeof useStyles>) => {
-  const classes = useStyles(props)
-  return (
-    <nav className={clsx(classes.root, className)} {...props}>
-      {links.map(({ name, to }) => (
-        <ButtonLink
-          key={to}
-          to={to}
-          className={classes.link}
-          size="small"
-          activeStyle={{
-            boxShadow: 'none',
-            outline: 'none',
-            border: 'none',
-            cursor: 'default',
-          }}
-          getProps={(o, old) => {
-            const dprops = { ...old, ...(o.isCurrent ? { tabIndex: -1 } : {}) }
-            return typeof getProps === 'function'
-              ? getProps({ name, to, ...o }, dprops)
-              : { ...dprops, ...getProps }
-          }}
-          {...(typeof linkProps === 'function'
-            ? linkProps({ name, to })
-            : linkProps)}
-        >
-          {name}
-        </ButtonLink>
-      ))}
-    </nav>
-  )
-}
+  className?: string
+}) => (
+  <nav {...props}>
+    {links.map(({ name, to }) => (
+      <ButtonLink
+        key={to}
+        to={to}
+        size="small"
+        activeStyle={{
+          boxShadow: 'none',
+          outline: 'none',
+          border: 'none',
+          cursor: 'default',
+        }}
+        getProps={(o, old) => {
+          const dprops = { ...old, ...(o.isCurrent ? { tabIndex: -1 } : {}) }
+          return typeof getProps === 'function'
+            ? getProps({ name, to, ...o }, dprops)
+            : { ...dprops, ...getProps }
+        }}
+        {...(typeof linkProps === 'function'
+          ? linkProps({ name, to })
+          : linkProps)}
+      >
+        {name}
+      </ButtonLink>
+    ))}
+  </nav>
+)

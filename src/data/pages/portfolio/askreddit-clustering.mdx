@@ -57,10 +57,12 @@ and low recall, while clustering may have high recall and low precision.
   />
   <figcaption>
     <Typography variant="caption">
-      A plot of k-means using multi-dimensional scaling and the cosine-similarity measure.
-      The data doesn't seem to be linearly separable but the actual results were decent. It could be that this
-      plotting method doesn't actually represent the behavior of the k-means algorithm, or the majority of the
-      clusters do overlap, and any patterns seen in the data were incidental.
+      A plot of k-means using multi-dimensional scaling and the
+      cosine-similarity measure. The data doesn't seem to be linearly separable
+      but the actual results were decent. It could be that this plotting method
+      doesn't actually represent the behavior of the k-means algorithm, or the
+      majority of the clusters do overlap, and any patterns seen in the data
+      were incidental.
     </Typography>
   </figcaption>
 </figure>
@@ -75,6 +77,7 @@ LDA didn't seem to be as successful as k-means in creating meaningful clusters. 
 perform well, but most topic terms had equal probability, leading to indistinct clusters.
 
 ## Future Ideas
+
 - k-means tended to cluster comments which included text from the title; this isn't interesting. Perhaps filter n-grams that exist
   in the title from the documents.
 - Use a quantitative evaluation mesure, either external evaluation with labeled data, or, considering the data set size, internal

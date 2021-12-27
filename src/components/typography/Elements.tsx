@@ -1,7 +1,7 @@
 import React from 'react'
-import { partial } from '@util/react-util'
-import { OverridableComponent } from '@util/types/OverridableComponent'
 import Typography, { TypographyProps, TypographyTypeMap } from './Typography'
+import { partial } from '@src/util/react-util'
+import { OverridableComponent } from '@src/util/types/OverridableComponent'
 
 export const Pre = (props: TypographyProps<'pre'>) => (
   <Typography component="pre" variant="subtitle1" {...props} />

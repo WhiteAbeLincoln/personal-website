@@ -1,17 +1,31 @@
+import { css } from '@linaria/core'
+import { graphql } from 'gatsby'
+import { MDXRenderer } from 'gatsby-plugin-mdx'
 import React, { useState } from 'react'
 import { Helmet } from 'react-helmet'
-import Typography from '@comps/typography'
-import Card, { CardList } from '@comps/Card'
-import { fromEntries } from '@util/util'
-import { makeStyles } from '@material-ui/styles'
-import { ClassesProp } from '@util/types'
-import Checkbox from '@comps/Checkbox'
-import { spacing, wrappedRow } from '@src/styles/theme'
-import { graphql } from 'gatsby'
+import Card, { CardList } from '@src/components/Card'
+import Checkbox from '@src/components/Checkbox'
+import Layout from '@src/components/Layout'
+import Typography from '@src/components/typography'
 import { PortfolioPagesQuery } from '@src/graphql.gen'
-import { isTruthy } from '@util/functional/predicates'
-import Layout from '@comps/Layout'
-import { MDXRenderer } from 'gatsby-plugin-mdx'
+import { spacing } from '@src/styles'
+import { fromEntries } from '@src/util'
+import { isTruthy } from '@src/util/functional/predicates'
+
+const styles = {
+  cards: css`
+    width: 100%;
+  `,
+  checkboxes: css`
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: ${spacing(2)};
+    row-gap: ${spacing(1)};
+    padding-bottom: ${spacing(1)};
+    width: 100%;
+  `,
+}
 
 type Item = {
   title: string
@@ -22,24 +36,7 @@ type Item = {
 
 const MANUAL_ITEMS: Item[] = []
 
-const useStyles = makeStyles(theme => ({
-  cards: {
-    width: '100%',
-  },
-  checkboxes: {
-    ...wrappedRow(spacing(theme)(2), spacing(theme)(1))(theme),
-    paddingBottom: spacing(theme)(1),
-    width: '100%',
-  },
-}))
-
-export const PortfolioTemplate = ({
-  className,
-  items,
-  ...props
-}: { items: Item[] } & ClassesProp<typeof useStyles>) => {
-  const classes = useStyles(props)
-
+export const PortfolioTemplate = ({ items }: { items: Item[] }) => {
   const tags = [
     ...new Set(
       items.reduce((acc, i) => (acc.push(...i.tags), acc), [] as string[]),
@@ -64,8 +61,8 @@ export const PortfolioTemplate = ({
       <Helmet>
         <title>Abraham White - Portfolio</title>
       </Helmet>
-      <Layout className={className}>
-        <div className={classes.checkboxes}>
+      <Layout>
+        <div className={styles.checkboxes}>
           {tags.map(t => (
             <Checkbox
               key={t}
@@ -76,7 +73,7 @@ export const PortfolioTemplate = ({
           ))}
         </div>
         <CardList
-          className={classes.cards}
+          className={styles.cards}
           items={getItems()}
           getKey={i => i.to}
         >

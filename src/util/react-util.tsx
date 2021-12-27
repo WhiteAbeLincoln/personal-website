@@ -3,22 +3,22 @@ import React, {
   ForwardRefExoticComponent,
   PropsWithoutRef,
   RefAttributes,
+  ComponentPropsWithoutRef,
 } from 'react'
-import { ComponentPropsWithoutRef } from 'react'
-import { MakePartial } from './types'
 import { has } from './functional/predicates'
-import { clsx } from './util'
+import { MakePartial } from './types'
 import {
   OverridableComponent,
   OverridableTypeMap,
   OverrideProps,
 } from './types/OverridableComponent'
+import { clsx } from '@src/styles'
 
 export function partial<
   M extends OverridableTypeMap,
   Comp extends React.ElementType,
   K extends keyof Props,
-  Props extends OverrideProps<M, Comp> = OverrideProps<M, Comp>
+  Props extends OverrideProps<M, Comp> = OverrideProps<M, Comp>,
 >(
   Comp: OverridableComponent<M>,
   pprops: { component: Comp } & Pick<Props, K>,
@@ -26,7 +26,7 @@ export function partial<
 export function partial<
   E extends React.ElementType | OverridableComponent<OverridableTypeMap>,
   K extends keyof Props,
-  Props extends ComponentPropsWithoutRef<E> = ComponentPropsWithoutRef<E>
+  Props extends ComponentPropsWithoutRef<E> = ComponentPropsWithoutRef<E>,
 >(
   Comp: E,
   pprops: Pick<Props, K>,
@@ -34,7 +34,7 @@ export function partial<
 export function partial<
   E extends React.ElementType | OverridableComponent<OverridableTypeMap>,
   K extends keyof Props,
-  Props extends ComponentPropsWithoutRef<E> = ComponentPropsWithoutRef<E>
+  Props extends ComponentPropsWithoutRef<E> = ComponentPropsWithoutRef<E>,
 >(
   Comp: E,
   pprops: Pick<Props, K>,
@@ -45,7 +45,7 @@ export function partial<
     ? pprops.className
     : undefined
 
-  return forwardRef((props: MakePartial<Props, K>, ref) => {
+  const comp = forwardRef((props: MakePartial<Props, K>, ref) => {
     const allProps = { ...pprops, ...props } as Props
     if (className && has(allProps, 'className', 'string')) {
       allProps.className = clsx(className, allProps.className)
@@ -53,4 +53,11 @@ export function partial<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return <Comp ref={ref} {...(allProps as any)} />
   })
+  comp.displayName = `Partial(${
+    typeof Comp === 'string'
+      ? Comp
+      : (Comp as Exclude<React.ElementType, string | symbol>).displayName ??
+        'unnamed'
+  })`
+  return comp
 }

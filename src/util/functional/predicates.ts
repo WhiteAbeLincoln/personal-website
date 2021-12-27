@@ -39,7 +39,7 @@ export function has<T, K extends PropertyKey>(
     typeof o === 'object' &&
     o != null &&
     k in o &&
-    (type ? typeof o[(k as unknown) as keyof T] === type : true)
+    (type ? typeof o[k as unknown as keyof T] === type : true)
   )
 }
 

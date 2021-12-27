@@ -60,6 +60,12 @@ export type DeepMaybe<T> = T extends unknown[]
   ? { [k in keyof T]?: DeepMaybe<T[k]> } | null | undefined
   : T | null | undefined
 
+export type DeepReadonly<T> = T extends unknown[]
+  ? Readonly<{ [k in keyof T]: DeepReadonly<T[k]> }>
+  : T extends object
+  ? Readonly<{ [k in keyof T]: DeepReadonly<T[k]> }>
+  : Readonly<T>
+
 export type ObjectEntries<T, A = Required<T>> = Array<
   { [k in keyof A]-?: [k, A[k]] }[keyof A]
 >
@@ -69,8 +75,9 @@ export type OmitNever<O> = Pick<
   { [k in keyof O]: O[k] extends never ? never : k }[keyof O]
 >
 
-export type RequireKeys<O, K extends keyof O> = O &
-  { [k in K]-?: NonNullable<O[k]> }
+export type RequireKeys<O, K extends keyof O> = O & {
+  [k in K]-?: NonNullable<O[k]>
+}
 
 export type ReplaceTypeOnce<T, Match, R> = T extends Match ? R : T
 export type ReplaceType<T, Match, RT> = T extends object

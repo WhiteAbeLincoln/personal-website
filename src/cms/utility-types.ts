@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-types */
 import {
   Field,
   WidgetFieldMap,
@@ -26,10 +28,7 @@ import {
   UnionToIntersection,
   MatchesExact,
 } from '../util/types'
-import {
-  TypogStylesData,
-  WidgetStylesData,
-} from './utility-fields'
+import { TypogStylesData, WidgetStylesData } from './utility-fields'
 
 type WidgetTypeMapBase<F extends Field> = {
   [k in Exclude<keyof WidgetFieldMap, 'number' | 'list'>]: Exclude<
@@ -102,20 +101,18 @@ type TypeKey<T extends { typeKey?: string }> = If<
 type GetVariableListFieldType<
   F extends VariableListWidgetField,
   types = GetObjectFieldType<{ fields: F['types'] }>,
-  key extends string = TypeKey<F>
+  key extends string = TypeKey<F>,
 > = Array<{ [t in keyof types]: { [k in key]: t } & types[t] }[keyof types]>
 
-type GetListFieldType<
-  F extends ListWidgetField
-> = F extends VariableListWidgetField
-  ? GetVariableListFieldType<F>
-  : GetStaticListFieldType<F>
+type GetListFieldType<F extends ListWidgetField> =
+  F extends VariableListWidgetField
+    ? GetVariableListFieldType<F>
+    : GetStaticListFieldType<F>
 
-type GetRelationFieldType<
-  F extends RelationWidgetField
-> = F extends RelationWidgetField & { __collectionType: object }
-  ? CollTypeFromPath<F>
-  : Exclude<F['default'], undefined>
+type GetRelationFieldType<F extends RelationWidgetField> =
+  F extends RelationWidgetField & { __collectionType: object }
+    ? CollTypeFromPath<F>
+    : Exclude<F['default'], undefined>
 
 type CollTypeFromPath<F extends { __collectionType: object }> = F extends {
   __valuePath: AllPaths<F['__collectionType']>
@@ -124,7 +121,7 @@ type CollTypeFromPath<F extends { __collectionType: object }> = F extends {
   : unknown
 
 export type GetObjectFieldType<
-  F extends { fields: Field[] | readonly Field[] }
+  F extends { fields: Field[] | readonly Field[] },
 > = UnionToIntersection<
   { [k in keyof F['fields']]: DataForObjectField<F['fields'][k]> }[number]
 >
@@ -145,28 +142,25 @@ type DataForObjectField<F> = F extends Field
     >
   : null
 
-export type FolderCollectionData<
-  C extends FolderCollection
-> = GetObjectFieldType<C>
+export type FolderCollectionData<C extends FolderCollection> =
+  GetObjectFieldType<C>
 
-export type FileCollectionEntryData<
-  C extends FileCollectionEntry
-> = GetObjectFieldType<C>
+export type FileCollectionEntryData<C extends FileCollectionEntry> =
+  GetObjectFieldType<C>
 
 type TemplateLiteralPart = string | number | bigint | boolean | null | undefined
-export type LabelToValue<
-  T extends TemplateLiteralPart
-> = T extends `label_${infer R}` ? `value_${R}` : never
+export type LabelToValue<T extends TemplateLiteralPart> =
+  T extends `label_${infer R}` ? `value_${R}` : never
 
 type NonObj = Primitive | ((...args: any) => any)
 type BuildParent<
   Parent extends TemplateLiteralPart,
-  Child extends keyof any
+  Child extends keyof any,
 > = `${Parent extends '' ? '' : `${Parent}.`}${Child & TemplateLiteralPart}`
 
 type GetStyleKeysArr<
   Obj extends any[],
-  Parent extends TemplateLiteralPart = ''
+  Parent extends TemplateLiteralPart = '',
 > = NonNullable<
   {
     [k in Indices<Obj>]: GetStyleKeys<Obj[k], BuildParent<Parent, k>>
@@ -175,7 +169,7 @@ type GetStyleKeysArr<
 
 type GetStyleKeysObj<
   Obj extends object,
-  Parent extends TemplateLiteralPart = ''
+  Parent extends TemplateLiteralPart = '',
 > = If<
   Matches<Obj, NonObj>,
   never,

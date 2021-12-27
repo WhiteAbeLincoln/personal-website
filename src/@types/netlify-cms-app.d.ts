@@ -35,7 +35,7 @@ declare module 'netlify-cms-app' {
     [string, string] | readonly [string, string]
   >
   export type SelectOptions<
-    T extends string | { label: string; value: unknown }
+    T extends string | { label: string; value: unknown },
   > = T extends any ? AddPhantomType<T[] | readonly T[]> : T
 
   export interface FieldBase {
@@ -150,7 +150,7 @@ declare module 'netlify-cms-app' {
   export interface SelectWidgetFieldBase<
     T extends string | { label: string; value: unknown } =
       | string
-      | { label: string; value: unknown }
+      | { label: string; value: unknown },
   > extends FieldBase {
     widget: 'select'
     default?: T

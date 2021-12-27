@@ -1,25 +1,32 @@
-import React from 'react'
-import Container from '@comps/Container'
+import { css } from '@linaria/core'
 import { graphql } from 'gatsby'
 import { MDXRenderer } from 'gatsby-plugin-mdx'
+import React from 'react'
 import { SimplePageQueryQuery } from '../graphql.gen'
-import SEO from '@comps/SEO'
-import Layout from '@comps/Layout'
-import { makeStyles, ThemeProvider } from '@material-ui/styles'
-import { markdownTheme } from '@src/styles/theme'
+import Container from '@src/components/Container'
+import Layout from '@src/components/Layout'
+import SEO from '@src/components/SEO'
+import { clsx } from '@src/styles'
 
-const useStyles = makeStyles({
-  root: {
-    '& ul, ol': {
-      marginLeft: '2ch',
-    },
-  },
-})
-
-export const SimpleTemplate = ({ body }: { body: string }) => {
-  const classes = useStyles()
+export const SimpleTemplate = ({
+  body,
+  className,
+}: {
+  body: string
+  className?: string
+}) => {
   return (
-    <Container className={classes.root}>
+    <Container
+      className={clsx(
+        className,
+        css`
+          & ul,
+          ol {
+            margin-left: 2ch;
+          }
+        `,
+      )}
+    >
       <article>
         <MDXRenderer>{body}</MDXRenderer>
       </article>
@@ -35,9 +42,7 @@ const Simple = ({ data: { mdx } }: { data: SimplePageQueryQuery }) => {
     <>
       <SEO title={title} seo={seo} />
       <Layout>
-        <ThemeProvider theme={markdownTheme}>
-          <SimpleTemplate body={body} />
-        </ThemeProvider>
+        <SimpleTemplate body={body} />
       </Layout>
     </>
   )

@@ -1,7 +1,7 @@
-import React, { forwardRef } from 'react'
-import { Link as GLink, GatsbyLinkProps } from 'gatsby'
 import type { LinkGetProps, AnchorProps } from '@reach/router'
-import { clsx } from '@util/util'
+import { Link as GLink, GatsbyLinkProps } from 'gatsby'
+import React, { forwardRef } from 'react'
+import { clsx } from '@src/styles'
 
 export type GetProps = (
   opts: LinkGetProps & { partiallyActive: boolean },

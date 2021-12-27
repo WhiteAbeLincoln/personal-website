@@ -1,44 +1,54 @@
-/** @jsx jsx */
-import React from 'react'
-import Typography, { TypographyProps } from '@comps/typography'
-import { forwardRef } from 'react'
-import { getBorderAndColor, getFocusedBorder, spacing, Theme, withCSSGetter } from '@src/styles/theme'
-import { css, jsx, } from '@emotion/react'
+import { css } from '@linaria/core'
+import React, { forwardRef } from 'react'
+import Typography, { TypographyProps } from '@src/components/typography'
+import { border, clsx, getVar, spacing } from '@src/styles'
+import { capitalize } from '@src/util'
 
-const inputStyles = withCSSGetter(getFocusedBorder, ({ focusedBorder, notFocusedBorder }) =>
-  css`
+const styles = {
+  icon: css`
+    ${border.base}
+    width: 1em;
+    height: 1em;
+    margin-top: 0.1em;
+    z-index: 2;
+    & * {
+      transition: all 0.1s;
+    }
+  `,
+  colorInherit: css`
+    color: inherit;
+  `,
+  colorPrimary: css`
+    color: ${getVar('palette-primary-main')};
+  `,
+  colorSecondary: css`
+    color: ${getVar('palette-secondary-main')};
+  `,
+  input: css`
     position: absolute;
     width: 1em;
     height: 1em;
     margin: 0;
     outline: 0;
     opacity: 0;
-    &:hover:enabled + svg, &:focus + svg {
-      ${focusedBorder}
+    &:hover:enabled + svg,
+    &:focus + svg {
+      ${border.focused}
     }
     &:focus:not(:focus-visible):not(:hover) + svg {
-      ${notFocusedBorder}
+      ${border.base}
     }
     &:checked + svg polyline {
       stroke: currentColor;
     }
-  `
-)
-
-const iconStyles = withCSSGetter(getBorderAndColor, ({ baseBorder, theme, color }) =>
-  css`
-    ${baseBorder}
-    width: 1em;
-    height: 1em;
-    margin-right: ${spacing(theme)(1)};
-    margin-top: 0.1em;
-    z-index: 2;
-    & * {
-      transition: all 0.1s;
-    }
-    color: ${color};
-  `
-)
+  `,
+  label: css`
+    cursor: pointer;
+    display: inline-flex;
+    align-items: start;
+    gap: ${spacing(1)};
+  `,
+}
 
 type Props = {
   label?: React.ReactNode
@@ -52,32 +62,19 @@ type Props = {
 } & JSX.IntrinsicElements['input']
 
 export default forwardRef<HTMLInputElement, Props>(function Checkbox(
-  {
-    label,
-    labelProps,
-    textProps,
-    color = 'primary',
-    ...props
-  }: Props,
+  { label, labelProps, textProps, color = 'primary', ...props }: Props,
   ref,
 ) {
   return (
-    <label
-      css={css`
-        cursor: pointer;
-        display: flex;
-        align-items: start;
-      `}
-      {...labelProps}
-    >
+    <label className={styles.label} {...labelProps}>
       <input
         type="checkbox"
-        css={inputStyles()}
+        className={clsx(styles.input, styles[`color${capitalize(color)}`])}
         ref={ref}
         {...props}
       />
       <svg
-        css={iconStyles({ color })}
+        className={clsx(styles.icon, styles[`color${capitalize(color)}`])}
         viewBox="0 0 32 32"
         aria-hidden="true"
         focusable="false"
@@ -89,7 +86,13 @@ export default forwardRef<HTMLInputElement, Props>(function Checkbox(
           fill="none"
         />
       </svg>
-      <Typography css={css`font-size: inherit;`} component="span" {...textProps}>
+      <Typography
+        className={css`
+          font-size: inherit;
+        `}
+        component="span"
+        {...textProps}
+      >
         {label}
       </Typography>
     </label>

@@ -122,7 +122,7 @@ export type GtEq<
   X extends number,
   Y extends number,
   True = '1',
-  False = '0'
+  False = '0',
 > = number extends X
   ? True | False
   : number extends Y
@@ -135,5 +135,5 @@ export type Gt<
   X extends number,
   Y extends number,
   True = '1',
-  False = '0'
+  False = '0',
 > = Equal<X, Y> extends '1' ? False : GtEq<X, Y, True, False>
