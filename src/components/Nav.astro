@@ -1,14 +1,17 @@
 ---
 import type { HTMLAttributes } from 'astro/types'
+import { getWriting } from '../content/config'
+
+const writing = await getWriting()
 
 type Links = readonly { readonly name: string; readonly to: string }[]
 const defaultLinks = [
-  { name: 'Home', to: '/' },
-  { name: 'Portfolio', to: '/portfolio' },
-  { name: 'Resume', to: '/resume' },
-  // { name: 'Writing', to: '/writing' },
-  { name: 'Contact', to: '/contact' },
-] as const satisfies Links
+  { name: 'Home' as const, to: '/' },
+  { name: 'Portfolio' as const, to: '/portfolio' },
+  { name: 'Resume' as const, to: '/resume' },
+  writing?.length && { name: 'Writing' as const, to: '/writing' },
+  { name: 'Contact' as const, to: '/contact' },
+].filter(x => !!x) satisfies Links
 
 type Props = {
   exclude?: (typeof defaultLinks)[number]['name'][]

@@ -1,20 +1,25 @@
 import rss from '@astrojs/rss'
-import { getCollection } from 'astro:content'
 import type { APIContext } from 'astro'
+import { getTitle } from '../util/util'
+import { getWriting } from '../content/config'
 
 export async function GET(context: APIContext) {
-  const blog: any[] = await getCollection('writing')
+  const blog = await getWriting()
+
+  const items = await Promise.all(blog.map(async post => {
+    const title = await getTitle(post.data, () => post.render().then(r => r.headings)) ?? post.slug
+    return {
+      title,
+      pubDate: post.data.pubDate,
+      description: post.data.summary,
+      link: `/writing/${post.slug}/`,
+    }
+  }))
   return rss({
     title: "Abe's Blog",
     site: context.site || '',
     description: "Writing and thoughts on just about anything",
-    items: blog.map(post => ({
-      title: post.data.title,
-      pubDate: post.data.pubDate,
-      description: post.data.description,
-      customData: post.data.customData,
-      link: `/writing/${post.slug}/`,
-    })),
+    items,
     customData: `<language>en-us</language>`
   })
 }

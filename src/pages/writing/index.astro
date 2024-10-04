@@ -1,37 +1,33 @@
 ---
 import Card from '../../components/Card.astro'
-import Checkbox from '../../components/Checkbox.astro'
 import Layout from '../../layouts/Layout.astro'
 import { Markdown } from '@astropub/md'
 import { getTitle } from '../../util/util'
-import { getPortfolio } from '../../content/config'
+import { getWriting } from '../../content/config'
 
-const allPortfolioItems = await getPortfolio()
+const allWriting = await getWriting()
 
 const items = await Promise.all(
-  allPortfolioItems.map(async i => {
+  allWriting.map(async i => {
     const title = await getTitle(i.data, () => i.render().then(r => r.headings))
     return { title: title ?? i.slug, ...i }
   })
 )
 items.sort((a, b) => {
-  const oa = a.data.order ?? 0
-  const ob = b.data.order ?? 0
+  const oa = a.data.pubDate?.valueOf() ?? 0
+  const ob = b.data.pubDate?.valueOf() ?? 0
   return ob - oa
 })
 
-function uniq(ts: string[]) {
+function uniq(ts: string[] = []) {
   return [...new Set(ts)]
 }
 
-const tags = uniq(items.flatMap(({ data }) => data.tags))
+const _tags = uniq(items.flatMap(({ data }) => data.tags ?? []))
 ---
 
-<Layout title="Portfolio" class="max-width-xl">
-  <h1 class="title">Portfolio</h1>
-  <div class="checkboxes">
-    {tags.map(t => <Checkbox data-tag={t}>{t}</Checkbox>)}
-  </div>
+<Layout title="Writing" class="max-width-xl">
+  <h1 class="title">Writing</h1>
   <div class="card-list">
     {
       items.map(({ title, data, slug, collection }) => (
@@ -39,7 +35,10 @@ const tags = uniq(items.flatMap(({ data }) => data.tags))
           <a slot="title" href={`/${collection}/${slug}`}>
             {title}
           </a>
-          <Markdown of={data.summary} />
+          <h3 class="ms-subtitle1" slot="header">
+            {data.pubDate?.toDateString() || 'Unpublished'}
+          </h3>
+          {data.summary && <Markdown of={data.summary} />}
           {!!data.tags?.length && (
             <Fragment slot="footer">
               <span class="subtitle2">{uniq(data.tags).join(', ')}</span>
