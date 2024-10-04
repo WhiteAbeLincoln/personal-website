@@ -1,0 +1,89 @@
+---
+title: SAT Solver
+summary: |
+  A solver for the Boolean Satisfiability Problem (SAT), made for CS5500 - Parallel Programming. Includes both
+  serial and portfolio-based parallel implementations.
+order: 3
+tags:
+  - School
+---
+
+# SAT Solver
+
+This project consists of two implementations of a SAT solver, created for CS5550 - Parallel Programming. A notable feature is that both implementations are written in a [literate programming](https://en.wikipedia.org/wiki/Literate_programming) style using [Emacs org-mode](https://orgmode.org/).
+
+You can view the project on [GitHub](https://github.com/WhiteAbeLincoln/sat-solver).
+
+## Overview
+
+The Boolean Satisfiability Problem (SAT) is an NP-complete decision problem,
+where the goal is to find whether there is an assignment of values to boolean variables
+in a propositional formula such that the formula evaluates to true. For example,
+determining whether $$ a \land \neg a $$ can be true for some value of $a$ is
+an SAT problem.
+
+Most SAT solvers take their input as a propositional logic formula in conjunctive normal form (CNF),
+involving variables and the operators _negation_ ($\neg$), _disjunction_ ($\lor$), and _conjunction_ ($\land$). A
+propositional logic formula in CNF is the conjunction of a set of clauses. A _clause_ is a disjunction
+of literals, and a _literal_ is a boolean variable $A$ which can be either positive ($A$), or negative ($\neg A$).
+
+Both solutions are C++ implementations of the DPLL algorithm:
+
+```python
+def dpll(F: Formula):
+  if F is empty:
+    return SAT
+  else if F contains empty clause:
+    return UNSAT
+  else if F contains pure literal l:
+    return dpll(F[l -> ⊤])
+  else if F contains unit clause [l]:
+    return dpll(F[l -> ⊤])
+  else
+    let l be a literal in F
+    if dpll(F[l -> ⊤]) = SAT:
+      return SAT
+    else:
+      return dpll(F[l -> ⊥])
+```
+
+## Serial
+
+<small>
+  <a href="https://github.com/WhiteAbeLincoln/sat-solver/blob/master/serial/serial.org">
+    Org document on GitHub
+  </a>
+</small>
+
+The basic DPLL algorithm can be defined recursively.
+In the algorithm, $F[l \to \top]$ denotes the formula obtained by replacing the literal $l$ with $\top$ and
+$\neg l$ with $\bot$ in $F$. A literal is pure if it occurs in $F$ but its opposite does not. A clause is unit
+if it contains only one literal.
+
+The DPLL algorithm consists of two key steps:
+
+1. _Literal Elimination_: If some literal is only seen in pure form, we can immediately determine the
+   truth value for that literal. For instance, if the literal is in the form $A$, we know that $A$ must be
+   $\top$, and if the literal is in the form $\neg A$, $A$ must be $\bot$.
+2. _Unit Propogation_: If there is a unit clause then we can immediately assign a truth value in the same
+   way we do for literal elimination.
+
+## Parallel
+
+<small>
+  <a href="https://github.com/WhiteAbeLincoln/sat-solver/blob/master/parallel/portfolio/portfolio.org">
+    Org document on GitHub
+  </a>
+</small>
+
+This implementation also uses the DPLL algorithm, parallelizing it using the _portfolio_ method.
+
+Parallel SAT solvers come in two variants, _portfolio_ and _divide-and-conquer_. A portfolio solver
+uses many different serial solvers, all racing to complete a single formula. This strategy is competitive
+because different formulas may benefit from different choices in branching strategy, but determining this
+from the beginning would be difficult.
+
+A divide-and-conquer solver splits the search space, sending part of the problem to identical serial solvers.
+These solvers communicate back to the main process, sending learned variables or conflict clauses.
+
+The key difference in this implementation from the serial version is the use of branching. The final case of the DPLL algorithm is to choose a literal $l$ from $F$, which can be done using different heuristics. In the serial implementation, we choose a single branching strategy at the start. For the parallel implementation, we instead use [MPI](https://www.open-mpi.org/) to spawn multiple processes, each attempting to solve the SAT problem using a different branching heuristic.

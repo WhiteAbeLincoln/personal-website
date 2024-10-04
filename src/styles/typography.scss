@@ -1,0 +1,166 @@
+@use "sass:math";
+@use "sass:string";
+@use "sass:list";
+@import "./breakpoints.scss";
+
+:root {
+  --headline-family: "Fira Code", ui-monospace, monospace;
+  --body-family: "Montserrat", "Helvetica", "Arial", system-ui;
+  --typography-gutter: 0.35rem;
+
+  font-family: var(--body-family);
+  // font-size: clamp(1rem, 0.5rem + 2vw, 1.25rem);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--headline-family);
+}
+h1, h2, h3, h4, h5, h6, p, span {
+  margin: 0;
+  &:not(.no-gutter) {
+    margin-bottom: var(--typography-gutter);
+  }
+}
+
+$scale-elems: (
+  ".display": 7,
+  "h1": 6,
+  "h2": 5,
+  "h3": 4,
+  "h4": 3,
+  "h5": 2,
+  "h6": 1,
+  "p": 0,
+  "span": 0,
+  ".subtitle1": 0,
+  "button": -0.55,
+  ".subtitle2": -1,
+  "caption": -1,
+  "figcaption": -1,
+  ".caption": -1,
+  "small": -1,
+);
+
+@function sstr($selector) {
+  @if string.index($selector, ".") == 1 {
+    @return string.slice($selector, 2);
+  }
+  @return $selector;
+}
+
+@mixin modular-scale-selector($key) {
+  #{$key}:not(.unstyled):not(.no-ms):not([class^='ms-']):not([class*=' ms-']) {
+    @content;
+  }
+  .ms-#{sstr($key)} {
+    @content;
+  }
+}
+
+@mixin modular-scale-elems($ratio, $between, $breakpoints, $elems: $scale-elems) {
+  @each $k, $p in $elems {
+    @include modular-scale-selector($k) {
+      font-size: 1rem * math.pow($ratio, $p);
+
+      $len: length($breakpoints);
+      @for $idx from 1 through $len {
+        $bp: nth($breakpoints, $idx);
+        $scale: $ratio * math.pow($between, $idx + 1);
+        @if $idx + 1 > $len {
+          @include bp-gt($bp) {
+            font-size: 1rem * math.pow($scale, $p);
+          }
+        }
+        @else {
+          $next: nth($breakpoints, $idx + 1);
+          @include bp('between', $bp, $next) {
+            font-size: 1rem * math.pow($scale, $p);
+          }
+        }
+      }
+    }
+  }
+}
+
+.display-theme {
+  @include modular-scale-elems(1.2, 1.05, ('sm', 'md', 'lg'));
+}
+
+@include modular-scale-elems(1.2, 1.02, ('sm', 'md'));
+
+.display {
+  font-weight: 300;
+  letter-spacing: -1.5px;
+  color: var(--ui-color);
+}
+h1:not(.unstyled) {
+  font-weight: 300;
+  letter-spacing: -1.5px;
+  color: var(--ui-color);
+}
+h2:not(.unstyled) {
+  font-weight: 300;
+  letter-spacing: -0.5px;
+  color: var(--ui-color);
+}
+h3:not(.unstyled) {
+  font-weight: 400;
+  // letter-spacing: 0px;
+  color: var(--ui-color);
+}
+h4:not(.unstyled) {
+  font-weight: 400;
+  letter-spacing: 0.25px;
+  color: var(--ui-color);
+}
+h5:not(.unstyled) {
+  font-weight: 400;
+  // letter-spacing: 0px;
+  color: var(--ui-color);
+}
+h6:not(.unstyled) {
+  font-weight: 500;
+  letter-spacing: 0.15px;
+  color: var(--ui-color);
+}
+p:not(.unstyled), span:not(.unstyled) {
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+small:not(.unstyled) {
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  & * {
+    font-family: var(--body-family);
+    font-size: inherit !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.4px !important;
+  }
+}
+.subtitle1 {
+  font-family: var(--headline-family);
+  font-weight: 400;
+  letter-spacing: 0.15px;
+}
+.subtitle2 {
+  font-family: var(--headline-family);
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+caption:not(.unstyled), figcaption:not(.unstyled), .caption {
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  & * {
+    font-family: var(--body-family);
+    font-size: inherit !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.4px !important;
+  }
+}
+
+a {
+  color: var(--theme-palette-secondary-main);
+  &:visited {
+    color: #774755;
+  }
+}

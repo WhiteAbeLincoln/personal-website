@@ -1,0 +1,58 @@
+@import './shadow-border.scss';
+@import './typography.scss';
+
+@mixin button-small {
+  padding: 0.5rem;
+}
+@mixin button-large {
+  padding: 1rem 1.5rem;
+}
+@mixin button {
+  appearance: none;
+  border: none;
+  background-color: inherit;
+
+  color: var(--ui-color);
+  font-family: var(--headline-family);
+
+  text-decoration: none;
+
+  display: inline-block;
+  min-width: 4rem;
+
+  padding: 0.5rem 1rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+
+  letter-spacing: 1.25px;
+  font-weight: 500;
+
+  @include shadow-border;
+
+  &.small {
+    @include button-small;
+  }
+
+  &.large {
+    @include button-large;
+  }
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  &:disabled, &.disabled {
+    color: var(--theme-palette-text-disabled);
+    cursor: default;
+  }
+
+  &:visited {
+    color: unset;
+  }
+}
+
+button, .button, input[type="submit"] {
+  @extend .ms-button;
+  @include button;
+}

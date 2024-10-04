@@ -1,0 +1,66 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+
+type Props = {
+  labelProps?: HTMLAttributes<'label'>
+  textProps?: HTMLAttributes<'span'>
+} & HTMLAttributes<'input'>
+
+const { labelProps, textProps, ...props } = Astro.props
+---
+
+<label {...labelProps}>
+  <input type="checkbox" {...props} />
+  <svg class="icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+    <polyline
+      points="4,14 12,23 28,5"
+      stroke="transparent"
+      stroke-width="4"
+      fill="none"></polyline>
+  </svg>
+  <span {...textProps}>
+    <slot />
+  </span>
+</label>
+<style lang="scss">
+  svg.icon {
+    border-style: solid;
+    border-width: var(--theme-border-base-width);
+    border-color: var(--ui-color);
+    width: 1em;
+    height: 1em;
+    margin-top: 0.1em;
+    z-index: 2;
+    & * {
+      transition: all 0.1s;
+    }
+  }
+  label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: start;
+    gap: 0.5rem;
+
+    & > span {
+      font-size: inherit;
+    }
+  }
+  input[type='checkbox'] {
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    margin: 0;
+    outline: 0;
+    opacity: 0;
+    &:hover:enabled + svg.icon,
+    &:focus + svg.icon {
+      border-width: var(--theme-border-focused-width);
+    }
+    &:focus:not(:focus-visible):not(:hover) + svg.icon {
+      border-width: var(--theme-border-base-width);
+    }
+    &:checked + svg.icon polyline {
+      stroke: var(--ui-color);
+    }
+  }
+</style>

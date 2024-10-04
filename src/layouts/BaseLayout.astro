@@ -1,0 +1,68 @@
+---
+import '../styles/global.scss'
+import '@fontsource/fira-code/300.css'
+import '@fontsource/fira-code/400.css'
+import '@fontsource/montserrat/400.css'
+import '@fontsource/montserrat/400-italic.css'
+import '@fontsource/montserrat/500.css'
+import '@fontsource/montserrat/500-italic.css'
+
+import { ViewTransitions } from 'astro:transitions'
+
+interface Props {
+  title: string
+  description?: string
+  keywords?: string[]
+  pubDate?: string
+  author?: string
+  lang?: string
+}
+const { title, description, keywords, author, lang = 'en-us' } = Astro.props
+---
+
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="og:title" content={title} />
+    <meta name="og:type" content="website" />
+    <meta name="og:site_name" content="Abraham White" />
+    <meta name="robots" content="nosnippet" />
+    {
+      description && (
+        <>
+          <meta name="description" content={description} />
+          <meta name="og:description" content={description} />
+        </>
+      )
+    }
+    {
+      author && (
+        <>
+          <meta name="author" content={author} />
+          <meta name="twitter:creator" content={author} />
+        </>
+      )
+    }
+    {
+      keywords?.length ? (
+        <meta name="keywords" content={keywords.join(', ')} />
+      ) : null
+    }
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Abe's Blog"
+      href={new URL('feed.xml', Astro.site)}
+    />
+    <title>{title}</title>
+    <ViewTransitions />
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

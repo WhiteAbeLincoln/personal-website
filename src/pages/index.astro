@@ -1,0 +1,62 @@
+---
+import Layout from '../layouts/BaseLayout.astro'
+import Nav from '../components/Nav.astro'
+---
+
+<Layout title="Abraham White">
+  <div class="container display-theme">
+    <header>
+      <h1 class="header display">Abraham White</h1>
+    </header>
+    <main>
+      <p class="desc no-ms">
+        I&apos;m a full-stack developer with a passion for programming language
+        design and type theory. I love using mathematics to model our messy
+        world, leading to safe and elegant solutions.
+      </p>
+      <Nav class="nav" exclude={['Home']} />
+    </main>
+  </div>
+</Layout>
+
+<style lang="scss">
+  @import '../styles/breakpoints.scss';
+  @import '../styles/button.scss';
+  .container {
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .header {
+    text-align: center;
+    line-height: 1;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  p.desc {
+    text-align: center;
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+    font-size: 1.5rem;
+    @include bp('lt', 'xs') {
+      text-align: unset;
+    }
+  }
+  .nav > :global(.nav__items) {
+    justify-content: space-evenly;
+    @include bp('lt', 'xs') {
+      justify-content: unset;
+      gap: 0.5rem;
+    }
+  }
+  .nav :global(.button) {
+    @include button-large;
+    font-size: 1rem;
+    @include bp('lt', 'sm') {
+      @include button-small;
+    }
+  }
+</style>

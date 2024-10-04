@@ -1,0 +1,15 @@
+User-Agent: GPTBot
+User-Agent: ClaudeBot
+User-Agent: Claude-Web
+User-Agent: Googlebot-Extended
+User-Agent: PerplexityBot
+User-Agent: Omgili
+User-Agent: Omgilibot
+User-Agent: ImagesiftBot
+User-Agent: Bytespider
+User-Agent: Amazonbot
+User-Agent: Youbot
+Disallow: /
+
+User-agent: *
+Allow: /

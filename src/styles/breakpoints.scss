@@ -1,0 +1,110 @@
+@use "sass:map";
+@use "sass:list";
+@use "sass:math";
+// not defined as css variables
+// since css vars can't be used
+// in media query clauses,
+// and duplicating would lead to
+// inconsistent behavior if vars are overridden
+$breakpoints: (
+  "xs": 0px,
+  "sm": 600px,
+  "md": 960px,
+  "lg": 1280px,
+  "xl": 1920px
+);
+$bp-step: 5;
+
+@mixin media($query, $extra: '', $type: '') {
+  @if $type != '' {
+    @media #{$type} and #{$query+$extra} {
+      @content;
+    }
+  } @else {
+    @media #{$query+$extra} {
+      @content;
+    }
+  }
+}
+
+@function bpmin($key) {
+  @return '(min-width: #{map.get($breakpoints, $key)})';
+}
+
+@function nextbp($key) {
+  $ret-next: false;
+  @each $k, $v in $breakpoints {
+    @if $ret-next {
+      @return $k;
+    }
+    @if $k == $key {
+      $ret-next: true;
+    }
+  }
+  @return list.nth(map-keys($map: $breakpoints), 1);
+}
+
+@function bpmax($key) {
+  @return '(max-width: #{map.get($breakpoints, nextbp($key)) - math.div($bp-step, 100)})';
+}
+
+@mixin bp-gt($key, $extra: '', $media-type: '') {
+  @include media(bpmin($key), $extra, $media-type) {
+    @content;
+  }
+}
+
+@mixin bp-lt($key, $extra: '', $media-type: '') {
+  @if $key == 'xl' {
+    @include bp-gt('xs', $extra, $media-type) {
+      @content;
+    }
+  }
+  @else {
+    @include media(bpmax($key), $extra, $media-type) {
+      @content;
+    }
+  }
+}
+
+@mixin bp-between($start, $end, $extra: '', $media-type: '') {
+  @if $end == 'xl' {
+    @include bp-gt($start, $extra, $media-type) {
+      @content;
+    }
+  }
+  @else {
+    @include media('#{bpmin($start)} and #{bpmax($end)}', $extra, $media-type) {
+      @content;
+    }
+  }
+}
+
+@mixin bp-exact($key, $extra: '', $media-type: '') {
+  @include bp-between($key, $key, $extra, $media-type) {
+    @content;
+  }
+}
+
+@mixin bp($mode, $args...) {
+  @if $mode == 'gt' {
+    @include bp-gt($args...) {
+      @content;
+    }
+  }
+  @else if $mode == 'lt' {
+    @include bp-lt($args...) {
+      @content;
+    }
+  }
+  @else if $mode == 'between' {
+    @include bp-between($args...) {
+      @content;
+    }
+  }
+  @else if $mode == 'exact' {
+    @include bp-exact($args...) {
+      @content;
+    }
+  }
+}

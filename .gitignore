@@ -1,7 +1,25 @@
-node_modules/
-.cache/
-public
-.direnv/
-.vscode/
+# build output
+dist/
+# generated types
+.astro/
 
-.linaria-cache
+# dependencies
+node_modules/
+.npm_global/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/

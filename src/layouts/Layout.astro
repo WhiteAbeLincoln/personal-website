@@ -1,0 +1,67 @@
+---
+import BaseLayout from './BaseLayout.astro'
+import Nav from '../components/Nav.astro'
+import type { MarkdownLayoutProps } from 'astro'
+import type { HTMLAttributes } from 'astro/types'
+import { getTitle } from '../util/util'
+
+type BaseProps = Partial<Parameters<typeof BaseLayout>[0]>
+type Props = BaseProps &
+  Partial<MarkdownLayoutProps<BaseProps>> &
+  Pick<HTMLAttributes<'main'>, 'style' | 'class'>
+const baseProps = (Astro.props.frontmatter ?? Astro.props) as Props
+const { style, class: cls, ...props } = baseProps
+const baseTitle = getTitle(props, () => Astro.props.headings)
+const title = baseTitle ? baseTitle + ' | Abraham White' : 'Abraham White'
+---
+
+<BaseLayout {...props} title={title}>
+  <slot name="head" slot="head" />
+  <header class="site-header">
+    <h1 class="home"><a aria-label="Home" href="/">AW</a></h1>
+    <Nav exclude={['Home']} />
+  </header>
+  <main class:list={['container', cls]} style={style}>
+    <slot />
+  </main>
+  <style lang="scss">
+    @import '../styles/breakpoints.scss';
+    .site-header {
+      min-height: 3.5rem;
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 0.15rem solid currentColor;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      @include bp-gt('sm') {
+        min-height: 4rem;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+      @include bp-lt('xs') {
+        flex-direction: column;
+        padding-bottom: 0.5rem;
+      }
+      @include bp-gt('xs', ' and (orientation: landscape)') {
+        min-height: 3rem;
+      }
+    }
+    .site-header > h1.home {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 0;
+      a,
+      a:visited {
+        text-decoration: none;
+        color: inherit;
+      }
+      @include bp-lt('xs') {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+    }
+  </style>
+</BaseLayout>

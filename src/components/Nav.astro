@@ -1,0 +1,66 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+
+type Links = readonly { readonly name: string; readonly to: string }[]
+const defaultLinks = [
+  { name: 'Home', to: '/' },
+  { name: 'Portfolio', to: '/portfolio' },
+  { name: 'Resume', to: '/resume' },
+  // { name: 'Writing', to: '/writing' },
+  { name: 'Contact', to: '/contact' },
+] as const satisfies Links
+
+type Props = {
+  exclude?: (typeof defaultLinks)[number]['name'][]
+} & HTMLAttributes<'nav'>
+
+const { exclude = [], ...rest } = Astro.props
+
+const currentPath = new URL(Astro.request.url).pathname
+const links = defaultLinks
+  .filter(l => !exclude.includes(l.name))
+  .map(l => ({
+    ...l,
+    active: currentPath.startsWith(l.to),
+    exact: currentPath.replace(/\/$/, '') === l.to,
+  }))
+---
+
+<nav role="navigation" {...rest}>
+  <ul class="nav__items">
+    {
+      links.map(({ name, to, active, exact }) => (
+        <li>
+          <a class="button" href={to} class:list={[{ active, exact }]}>
+            {name}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+<style>
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+  li {
+    list-style-type: none;
+  }
+  a {
+    width: 100%;
+  }
+  a.active {
+    box-shadow: none;
+    outline: none;
+    border: none;
+  }
+  a.active.exact {
+    cursor: default;
+  }
+</style>

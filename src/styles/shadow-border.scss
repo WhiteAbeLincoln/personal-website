@@ -1,0 +1,16 @@
+@mixin shadow-border($hover: true, $focus: true) {
+  outline-color: transparent;
+  outline-width: var(--theme-border-base-width);
+  outline-style: solid;
+  box-shadow: 0 0 0 var(--theme-border-base-width) var(--ui-color);
+  @if $focus == true {
+    &:focus, &:focus-visible, &.focused {
+      box-shadow: 0 0 0 var(--theme-border-focused-width) var(--ui-color);
+    }
+  }
+  @if $hover == true {
+    &:hover, &.hover {
+      box-shadow: 0 0 0 var(--theme-border-focused-width) var(--ui-color);
+    }
+  }
+}

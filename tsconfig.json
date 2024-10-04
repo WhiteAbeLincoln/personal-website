@@ -1,28 +1,11 @@
 {
+  "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "target": "es2017",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "allowJs": true,
-    "checkJs": true,
-    "jsx": "preserve",
-    "skipLibCheck": true,
-    "outDir": "./build",
-    "rootDir": ".",
-    "strict": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@src/*": [
-        "./src/*"
-      ]
-    }
+    // Force functions designed to override their parent class to be specified as `override`.
+    "noImplicitOverride": true,
+    // Force the usage of the indexed syntax to access fields declared using an index signature.
+    "noUncheckedIndexedAccess": true,
+    // Report an error for unused labels instead of just a warning.
+    "allowUnusedLabels": false
   },
-  "include": [
-    "src/**/*",
-    "gatsby-*.js",
-    "config/**/*.ts"
-  ]
 }

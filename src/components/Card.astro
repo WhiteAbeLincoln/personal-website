@@ -1,0 +1,92 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+
+type Props = HTMLAttributes<'article'>
+
+const props = Astro.props
+---
+
+<article class="card flex-container" {...props}>
+  <header class="card--header word">
+    <h2 class="ms-h5">
+      <slot name="title" />
+    </h2>
+  </header>
+  <div class="card--body flex-container word">
+    <slot />
+  </div>
+  {
+    Astro.slots.has('footer') && (
+      <footer class="card--footer">
+        <slot name="footer" />
+      </footer>
+    )
+  }
+</article>
+
+<script>
+  const cards = document.querySelectorAll('.card')
+  for (const card of cards) {
+    if (!(card instanceof HTMLElement)) {
+      continue
+    }
+    const link = card.querySelector('header.card--header a')
+    if (link && link instanceof HTMLAnchorElement) {
+      const loc = link.href
+      card.classList.add('interactive')
+      card.addEventListener('click', () => {
+        window.location.href = loc
+      })
+    }
+  }
+</script>
+
+<style lang="scss">
+  @import '../styles/shadow-border.scss';
+
+  .card {
+    padding: 1rem;
+
+    @include shadow-border(false, false);
+
+    & > * + * {
+      margin-top: 1rem;
+    }
+  }
+
+  .card.interactive {
+    cursor: pointer;
+    @include shadow-border(true, true);
+  }
+
+  .flex-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .word {
+    word-break: break-word;
+  }
+
+  .card--body {
+    flex-grow: 1;
+    max-width: 70ch;
+  }
+
+  .card--footer {
+    margin-top: auto;
+  }
+
+  .card--header :global(a) {
+    &:focus,
+    &:hover {
+      outline: 0;
+      text-decoration: underline;
+    }
+    text-decoration: none;
+    color: inherit;
+    &:visited {
+      color: inherit;
+    }
+  }
+</style>

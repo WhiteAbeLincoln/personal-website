@@ -1,0 +1,114 @@
+---
+import Card from '../../components/Card.astro'
+import Checkbox from '../../components/Checkbox.astro'
+import Layout from '../../layouts/Layout.astro'
+import { Markdown } from '@astropub/md'
+import { getCollection } from 'astro:content'
+import { getTitle } from '../../util/util'
+
+const allPortfolioItems = await getCollection('portfolio', ({ data }) =>
+  import.meta.env.PROD ? data.draft !== true : true
+)
+
+const items = await Promise.all(
+  allPortfolioItems.map(async i => {
+    const title = await getTitle(i.data, () => i.render().then(r => r.headings))
+    return { title: title ?? i.slug, ...i }
+  })
+)
+items.sort((a, b) => {
+  const oa = a.data.order ?? 0
+  const ob = b.data.order ?? 0
+  return ob - oa
+})
+
+function uniq(ts: string[]) {
+  return [...new Set(ts)]
+}
+
+const tags = uniq(items.flatMap(({ data }) => data.tags))
+---
+
+<Layout title="Portfolio" class="max-width-xl">
+  <h1 class="title">Portfolio</h1>
+  <div class="checkboxes">
+    {tags.map(t => <Checkbox data-tag={t}>{t}</Checkbox>)}
+  </div>
+  <div class="card-list">
+    {
+      items.map(({ title, data, slug, collection }) => (
+        <Card data-tag={uniq(data.tags).join(',')}>
+          <a slot="title" href={`/${collection}/${slug}`}>
+            {title}
+          </a>
+          <Markdown of={data.summary} />
+          {!!data.tags?.length && (
+            <Fragment slot="footer">
+              <span class="subtitle2">{uniq(data.tags).join(', ')}</span>
+            </Fragment>
+          )}
+        </Card>
+      ))
+    }
+  </div>
+  <script>
+    const tags = new Set<string>()
+    const boxes = document.querySelectorAll(
+      '.checkboxes input[type="checkbox"]'
+    )
+    const cards = document.querySelectorAll('.card[data-tag]')
+
+    for (const box of boxes) {
+      if (!(box instanceof HTMLInputElement)) continue
+
+      const tag = box.dataset.tag
+      if (tag) {
+        box.addEventListener('change', () => {
+          if (box.checked) {
+            tags.add(tag)
+          } else {
+            tags.delete(tag)
+          }
+
+          filterCards()
+        })
+      }
+    }
+
+    function filterCards() {
+      const empty = tags.size === 0
+      for (const card of cards) {
+        if (!(card instanceof HTMLElement)) continue
+
+        const cardTags = (card.dataset.tag || '').split(',')
+        if (!empty && !cardTags.some(t => tags.has(t))) {
+          card.classList.add('hidden-card')
+        } else {
+          card.classList.remove('hidden-card')
+        }
+      }
+    }
+  </script>
+  <style lang="scss">
+    .title {
+      text-align: center;
+    }
+    .checkboxes {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 1rem;
+      row-gap: 0.5rem;
+      padding-bottom: 0.5rem;
+      width: 100%;
+    }
+    .card-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+      gap: 1.5rem;
+    }
+    .hidden-card {
+      display: none;
+    }
+  </style>
+</Layout>

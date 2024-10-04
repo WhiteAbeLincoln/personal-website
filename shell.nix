@@ -2,8 +2,10 @@
 
 pkgs.mkShell {
   name = "node";
-  buildInputs = [ pkgs.nodejs-16_x ];
+  buildInputs = [ pkgs.nodejs_22 ];
   shellHook = ''
-    export PATH="$PWD/node_modules/.bin/:$PATH"
+    mkdir -p "$PWD/.npm_global"
+    export PATH="$PWD/node_modules/.bin/:$PWD/.npm_global/bin:$PATH"
+    export npm_config_prefix="$PWD/.npm_global"
   '';
 }
