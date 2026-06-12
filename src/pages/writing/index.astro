@@ -1,8 +1,8 @@
 ---
 import Card from '../../components/Card.astro'
 import Layout from '../../layouts/Layout.astro'
-import { Markdown } from '@astropub/md'
 import { getTitle } from '../../util/util'
+import { renderMarkdown } from '../../util/markdown'
 import { render } from 'astro:content'
 import { getWriting } from '../../content.config'
 
@@ -11,7 +11,8 @@ const allWriting = await getWriting()
 const items = await Promise.all(
   allWriting.map(async i => {
     const title = await getTitle(i.data, () => render(i).then(r => r.headings))
-    return { title: title ?? i.id, ...i }
+    const summaryHtml = i.data.summary && (await renderMarkdown(i.data.summary))
+    return { title: title ?? i.id, summaryHtml, ...i }
   })
 )
 items.sort((a, b) => {
@@ -31,7 +32,7 @@ const _tags = uniq(items.flatMap(({ data }) => data.tags ?? []))
   <h1 class="title">Writing</h1>
   <div class="card-list">
     {
-      items.map(({ title, data, id, collection }) => (
+      items.map(({ title, data, id, collection, summaryHtml }) => (
         <Card data-tag={uniq(data.tags).join(',')}>
           <a slot="title" href={`/${collection}/${id}`}>
             {title}
@@ -39,7 +40,7 @@ const _tags = uniq(items.flatMap(({ data }) => data.tags ?? []))
           <h3 class="ms-subtitle1" slot="header">
             {data.pubDate?.toDateString() || 'Unpublished'}
           </h3>
-          {data.summary && <Markdown of={data.summary} />}
+          {summaryHtml && <Fragment set:html={summaryHtml} />}
           {!!data.tags?.length && (
             <Fragment slot="footer">
               <span class="subtitle2">{uniq(data.tags).join(', ')}</span>

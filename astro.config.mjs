@@ -3,7 +3,6 @@ import { defineConfig } from "astro/config";
 
 import sitemap from "@astrojs/sitemap";
 import mdx from "@astrojs/mdx";
-import md from "@astropub/md";
 import { unified } from "@astrojs/markdown-remark";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -12,7 +11,7 @@ import rehypeDocument from "rehype-document";
 // https://astro.build/config
 export default defineConfig({
   site: "https://abewhite.dev",
-  integrations: [sitemap(), mdx(), md()],
+  integrations: [sitemap(), mdx()],
   markdown: {
     processor: unified({
       remarkPlugins: [remarkMath],
