@@ -1,6 +1,9 @@
-import { z, defineCollection, getCollection } from 'astro:content';
+import { defineCollection, getCollection } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
 
 const portfolioCollection = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/portfolio' }),
   schema: z.object({
     title: z.optional(z.string()),
     summary: z.string(),
@@ -8,19 +11,18 @@ const portfolioCollection = defineCollection({
     order: z.optional(z.number()),
     draft: z.optional(z.boolean()),
   }),
-  type: 'content',
 })
 
 const writingCollection = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/writing' }),
   schema: z.object({
     title: z.optional(z.string()),
     summary: z.optional(z.string()),
     tags: z.optional(z.array(z.string())),
     draft: z.optional(z.boolean()),
-    pubDate: z.optional(z.date({ coerce: true })),
-    updatedDate: z.optional(z.date({ coerce: true })),
+    pubDate: z.optional(z.coerce.date()),
+    updatedDate: z.optional(z.coerce.date()),
   }),
-  type: 'content',
 })
 
 export const getWriting = () => getCollection('writing', ({ data }) =>

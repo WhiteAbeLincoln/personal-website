@@ -1,18 +1,19 @@
 import rss from '@astrojs/rss'
 import type { APIContext } from 'astro'
+import { render } from 'astro:content'
 import { getTitle } from '../util/util'
-import { getWriting } from '../content/config'
+import { getWriting } from '../content.config'
 
 export async function GET(context: APIContext) {
   const blog = await getWriting()
 
   const items = await Promise.all(blog.map(async post => {
-    const title = await getTitle(post.data, () => post.render().then(r => r.headings)) ?? post.slug
+    const title = await getTitle(post.data, () => render(post).then(r => r.headings)) ?? post.id
     return {
       title,
       pubDate: post.data.pubDate,
       description: post.data.summary,
-      link: `/writing/${post.slug}/`,
+      link: `/writing/${post.id}/`,
     }
   }))
   return rss({

@@ -3,14 +3,15 @@ import Card from '../../components/Card.astro'
 import Layout from '../../layouts/Layout.astro'
 import { Markdown } from '@astropub/md'
 import { getTitle } from '../../util/util'
-import { getWriting } from '../../content/config'
+import { render } from 'astro:content'
+import { getWriting } from '../../content.config'
 
 const allWriting = await getWriting()
 
 const items = await Promise.all(
   allWriting.map(async i => {
-    const title = await getTitle(i.data, () => i.render().then(r => r.headings))
-    return { title: title ?? i.slug, ...i }
+    const title = await getTitle(i.data, () => render(i).then(r => r.headings))
+    return { title: title ?? i.id, ...i }
   })
 )
 items.sort((a, b) => {
@@ -30,9 +31,9 @@ const _tags = uniq(items.flatMap(({ data }) => data.tags ?? []))
   <h1 class="title">Writing</h1>
   <div class="card-list">
     {
-      items.map(({ title, data, slug, collection }) => (
+      items.map(({ title, data, id, collection }) => (
         <Card data-tag={uniq(data.tags).join(',')}>
-          <a slot="title" href={`/${collection}/${slug}`}>
+          <a slot="title" href={`/${collection}/${id}`}>
             {title}
           </a>
           <h3 class="ms-subtitle1" slot="header">

@@ -4,14 +4,15 @@ import Checkbox from '../../components/Checkbox.astro'
 import Layout from '../../layouts/Layout.astro'
 import { Markdown } from '@astropub/md'
 import { getTitle } from '../../util/util'
-import { getPortfolio } from '../../content/config'
+import { render } from 'astro:content'
+import { getPortfolio } from '../../content.config'
 
 const allPortfolioItems = await getPortfolio()
 
 const items = await Promise.all(
   allPortfolioItems.map(async i => {
-    const title = await getTitle(i.data, () => i.render().then(r => r.headings))
-    return { title: title ?? i.slug, ...i }
+    const title = await getTitle(i.data, () => render(i).then(r => r.headings))
+    return { title: title ?? i.id, ...i }
   })
 )
 items.sort((a, b) => {
@@ -34,9 +35,9 @@ const tags = uniq(items.flatMap(({ data }) => data.tags))
   </div>
   <div class="card-list">
     {
-      items.map(({ title, data, slug, collection }) => (
+      items.map(({ title, data, id, collection }) => (
         <Card data-tag={uniq(data.tags).join(',')}>
-          <a slot="title" href={`/${collection}/${slug}`}>
+          <a slot="title" href={`/${collection}/${id}`}>
             {title}
           </a>
           <Markdown of={data.summary} />
